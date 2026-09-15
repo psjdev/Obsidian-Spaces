@@ -49,7 +49,11 @@ of `npm run build`, which the release workflow runs.
   where the main window's constructors and globals are the wrong ones to
   compare against.
 - `setWarning` and `noticeEl` are replaced by `setDestructive` and
-  `messageEl`. Like for like: no button changes appearance.
+  `messageEl`. The two Delete buttons, in the settings list and in the
+  confirmation dialog, do change appearance: `mod-warning` filled them solid
+  red with white text, and `mod-destructive` renders a red tint with red text
+  and a red border. This entry originally claimed neither button changed, on
+  the strength of the class being applied rather than of what it renders.
 - Twelve redundant type assertions are gone. Two of the twelve turned out to
   be load-bearing and were rewritten as `satisfies` rather than removed.
 
