@@ -73,7 +73,7 @@ export function resyncInertSiblings(
     inertSiblings.splice(i, 1);
   }
   for (const child of Array.from(parent.children)) {
-    if (child === el || !(child instanceof HTMLElement)) continue;
+    if (child === el || !child.instanceOf(HTMLElement)) continue;
     if (inertSiblings.includes(child) || child.inert) continue;
     child.inert = true;
     inertSiblings.push(child);

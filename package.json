@@ -1,24 +1,30 @@
 {
   "name": "obsidian-spaces",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Switch between curated views of your vault's folders and notes.",
   "private": true,
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "tsc --noEmit && node esbuild.config.mjs production",
+    "lint": "eslint src",
+    "build": "eslint src && tsc --noEmit && node esbuild.config.mjs production",
     "dev": "node esbuild.config.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@eslint/json": "^2.1.0",
     "@types/node": "^22.0.0",
     "@vitest/coverage-v8": "^2.1.9",
     "esbuild": "^0.24.0",
+    "eslint": "^10.10.0",
+    "eslint-plugin-obsidianmd": "^0.4.2",
     "jsdom": "^25.0.0",
     "obsidian": "^1.8.7",
     "typescript": "^5.6.0",
+    "typescript-eslint": "^8.70.0",
     "vitest": "^2.1.0"
   }
 }

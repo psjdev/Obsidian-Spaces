@@ -345,7 +345,10 @@ export class SpacesSettingTab extends PluginSettingTab {
     // rather than on, because it rearranges a strip existing users already
     // read fluently. Turning that on unasked during an update reads as a bug.
     new Setting(containerEl)
-      .setName("Pin All to the left of the space strip")
+      // Led by "All" rather than "Pin All …": sentence case is linted, and
+      // mid-sentence the view's own label is indistinguishable from the
+      // quantifier — "Pin all …" would read as pinning every icon.
+      .setName("All stays at the left of the space strip")
       .setDesc(
         "Keeps All in place while the other space icons scroll past it, " +
           "the way the + button stays pinned to the right."
@@ -532,7 +535,10 @@ export class SpacesSettingTab extends PluginSettingTab {
     // accent spine singles the row out without telling the reader anything the
     // disabled toggle and its copy are not already saying.
     new Setting(containerEl)
-      .setName("Allow reordering in All")
+      // "outside spaces" for the same sentence-case reason as the setting
+      // above. All is the only thing outside a space, and the description
+      // below still names it.
+      .setName("Allow reordering outside spaces")
       .setDesc(
         allowReordering
           ? "Drag rows to arrange them in All as well as in spaces. Turn this off to leave " +
@@ -568,7 +574,11 @@ export class SpacesSettingTab extends PluginSettingTab {
 
   /** What a space switch carries with it. */
   private renderSwitching(containerEl: HTMLElement): void {
-    new Setting(containerEl).setName("Switching spaces").setHeading();
+    // "Switching", not "Switching spaces": a settings heading that repeats the
+    // plugin name reads as a label inside its own tab, and Obsidian lints for
+    // it (`obsidianmd/settings-tab/no-problematic-settings-headings`). The
+    // settings below say what is being switched.
+    new Setting(containerEl).setName("Switching").setHeading();
 
     const restore = new Setting(containerEl)
       .setName("Restore tabs when switching spaces")
@@ -686,7 +696,7 @@ export class SpacesSettingTab extends PluginSettingTab {
       setting.addButton((b) =>
         b
           .setButtonText("Delete")
-          .setWarning()
+          .setDestructive()
           .onClick(async () => {
             // This tab is bulk management, and this button
             // sits a couple of clicks right of the rename field. Deletion

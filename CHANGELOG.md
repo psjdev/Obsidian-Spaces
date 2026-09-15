@@ -1,5 +1,42 @@
 # Changelog
 
+## 0.1.5 — 2026-09-15
+
+Acts on the community directory's automated review of 0.1.4, and adds the lint
+that review runs so the next one holds no surprises. `npm run lint` is now part
+of `npm run build`, which the release workflow runs.
+
+### Release integrity
+
+- Release assets carry GitHub build provenance attestations, so anyone can
+  verify that the `main.js` they downloaded was built from this repository at
+  the tagged commit. Applies from this release onward.
+
+### Interface
+
+- "All stays at the left of the space strip" and "Allow reordering outside
+  spaces" replace two settings whose names read as Title Case to Obsidian's
+  sentence-case lint. Mid-sentence, "All" is indistinguishable from the
+  quantifier: "Pin all …" would mean pinning every icon.
+- The colour field's placeholder reads "Hex value" rather than a "#5b5bff"
+  sample, for the same lint. The label is unchanged.
+- The "Switching spaces" settings heading is now "Switching". A heading that
+  repeats the plugin name inside the plugin's own tab says nothing.
+
+### Correctness
+
+- Element type tests use Obsidian's cross-window `instanceOf` rather than
+  `instanceof`, and the animation frame the file explorer schedules is
+  requested and cancelled on `window`. Both are about a popped-out explorer,
+  where the main window's constructors and globals are the wrong ones to
+  compare against.
+- `setWarning` and `noticeEl` are replaced by `setDestructive` and
+  `messageEl`. Like for like: no button changes appearance.
+- Twelve redundant type assertions are gone. Two of the twelve turned out to
+  be load-bearing and were rewritten as `satisfies` rather than removed.
+
+No change to what the plugin does, or to any saved data.
+
 ## 0.1.4 — 2026-09-15
 
 Brings the plugin in line with Obsidian's developer policies and UI style guide.

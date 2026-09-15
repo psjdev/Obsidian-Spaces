@@ -171,6 +171,8 @@
 }
 
 .spaces-create-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+/* The name field takes what the icon button beside it does not. */
+.spaces-create-name { flex: 1 1 auto; }
 /* What a failed Create points at. Obsidian's own error variables, so it reads
    as an error in any theme rather than a hardcoded red. */
 /* The focus states are listed explicitly, and that is the whole point of this

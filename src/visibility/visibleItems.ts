@@ -29,7 +29,7 @@ export interface VisibilityLookup {
    * `reasonFor` call to give it. Once that lands, this can be made required and
    * the fallback below deleted.
    */
-  isVisible?(path: string): boolean;
+  isVisible?(this: void, path: string): boolean;
   decisionFor(path: string): { visible: boolean };
 }
 
@@ -55,8 +55,11 @@ export function filterVisibleItems<T extends FilterableItem>(
     if (typeof path !== "string") return true;
     // `!== false` in both arms, not a bare truthiness test: filtering fails OPEN, so
     // anything that is not an explicit "no" keeps the row.
+    // Called plainly, not `.call(snapshot, …)`: the interface declares
+    // `this: void`, so an implementation that needed a receiver would not
+    // typecheck in the first place, and passing one said otherwise.
     return isVisible
-      ? isVisible.call(snapshot, path) !== false
+      ? isVisible(path) !== false
       : snapshot.decisionFor(path).visible !== false;
   });
 }

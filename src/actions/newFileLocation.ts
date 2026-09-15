@@ -48,6 +48,10 @@ export function installNewFileRedirect(app: App, activeRoot: () => string | null
   const existing = patched.get(fm);
   if (existing) return existing.restore;
 
+  // Deliberately unbound: the wrapper below calls it as `original.call(fm, …)`,
+  // re-supplying the receiver the patch took away. `unbound-method` cannot see
+  // that and flags the extraction itself.
+  // eslint-disable-next-line @typescript-eslint/unbound-method -- the wrapper re-supplies the receiver with .call(fm, …)
   const original: NewFileParent = fm.getNewFileParent;
 
   // Goes false on restore, whether or not our wrapper can be lifted back out.

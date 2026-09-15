@@ -218,7 +218,7 @@ export class DragOrdering {
     let best: { el: HTMLElement; path: string } | null = null;
     let bestDist = Number.POSITIVE_INFINITY;
     for (const titled of Array.from(c.querySelectorAll(SEL.titleWithPath))) {
-      if (!(titled instanceof HTMLElement)) continue;
+      if (!titled.instanceOf(HTMLElement)) continue;
       const r = titled.getBoundingClientRect();
       if (r.height <= 0) continue;
       const path = titled.getAttribute("data-path");

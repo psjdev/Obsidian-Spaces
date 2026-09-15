@@ -52,7 +52,7 @@ export function spaceEntries(
       active: selection.kind === "all",
     },
     ...spaces.map((s) => ({
-      key: { kind: "space", id: s.id } as ActiveSelection,
+      key: { kind: "space", id: s.id } satisfies ActiveSelection,
       icon: renderableIcon(s.icon, knownIcons),
       label: s.name,
       color: s.color,

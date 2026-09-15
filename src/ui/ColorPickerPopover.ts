@@ -205,7 +205,10 @@ export function openColorPicker(deps: ColorPickerDeps): AnchoredPopover {
     hex.type = "text";
     hex.className = "spaces-color-hex";
     hex.setAttribute("aria-label", "Colour hex value");
-    hex.placeholder = "#5b5bff";
+    // "Hex value" rather than a "#5b5bff" sample: Obsidian lints UI text for
+    // sentence case, and the only spelling of a hex sample that rule accepts
+    // is "#5B5bff", which reads as a typo. The aria-label carries the rest.
+    hex.placeholder = "Hex value";
     row.appendChild(preview);
     row.appendChild(hex);
     wrap.appendChild(row);

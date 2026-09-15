@@ -78,7 +78,7 @@ let shadowWarned = false;
 
 function asObject(view: unknown): (SortableExplorerView & object) | null {
   if (!view || typeof view !== "object") return null;
-  return view as SortableExplorerView & object;
+  return view;
 }
 
 /** Both methods must be callable. Absent or non-function → "unknown" → off. */
@@ -323,7 +323,7 @@ export function displayedPaths(view: unknown, folder: unknown): string[] | null 
     if (!Array.isArray(items)) return null;
     const out: string[] = [];
     for (const item of items) {
-      const p = (item as FolderItemLike)?.file?.path;
+      const p = (item satisfies FolderItemLike)?.file?.path;
       if (typeof p === "string") out.push(p);
     }
     return out;

@@ -49,7 +49,7 @@ export class ConfirmModal extends Modal {
       .addButton((b) =>
         b
           .setButtonText(this.prompt.confirmLabel)
-          .setWarning()
+          .setDestructive()
           .onClick(() => {
             this.answer(true);
             this.close();

@@ -374,7 +374,7 @@ export class CreateSpacePanel {
       // which elements we touch, so `destroy()` never clears an `inert`
       // someone else set.
       for (const child of Array.from(parent.children)) {
-        if (child === el || !(child instanceof HTMLElement) || child.inert) continue;
+        if (child === el || !child.instanceOf(HTMLElement) || child.inert) continue;
         child.inert = true;
         this.inertSiblings.push(child);
       }
@@ -605,7 +605,7 @@ export class CreateSpacePanel {
     if (!(active instanceof HTMLElement) || !this.el?.contains(active)) return null;
     const key = active.dataset.focusKey;
     if (!key) return null;
-    const isText = active instanceof HTMLInputElement && active.type === "text";
+    const isText = active.instanceOf(HTMLInputElement) && active.type === "text";
     return {
       key,
       selStart: isText ? active.selectionStart : null,
@@ -626,7 +626,7 @@ export class CreateSpacePanel {
     for (const el of Array.from(this.el.querySelectorAll<HTMLElement>("[data-focus-key]"))) {
       if (el.dataset.focusKey !== captured.key) continue;
       el.focus();
-      if (el instanceof HTMLInputElement && captured.selStart !== null) {
+      if (el.instanceOf(HTMLInputElement) && captured.selStart !== null) {
         el.setSelectionRange(captured.selStart, captured.selEnd ?? captured.selStart);
       }
       return;
@@ -678,10 +678,12 @@ export class CreateSpacePanel {
 
     const nameInput = doc.createElement("input");
     nameInput.type = "text";
-    nameInput.className = "text-input";
+    // The filling half of the name row. The growth rule is a class rather
+    // than an inline style so a theme can reach it, which is also what
+    // `obsidianmd/no-static-styles-assignment` is asking for.
+    nameInput.className = "text-input spaces-create-name";
     nameInput.placeholder = "Space name…";
     nameInput.value = this.state.name;
-    nameInput.style.flex = "1 1 auto";
     // Mirrors validateSpace's own cap (schema.ts) so a pasted long name is
     // stopped visibly here rather than submitted and rejected by validation
     // with a Notice and an otherwise-unchanged form.

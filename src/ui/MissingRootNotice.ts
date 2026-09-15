@@ -61,7 +61,7 @@ export class MissingRootNotice {
     const key = `${space.name} ${detail}`;
     // `isConnected` distinguishes a live toast from one Obsidian has already
     // dismissed; without it a dismissed notice would never be raised again.
-    if (this.aboutSpaceId === space.id && this.notice?.noticeEl.isConnected) {
+    if (this.aboutSpaceId === space.id && this.notice?.messageEl.isConnected) {
       if (this.shownKey !== key) {
         this.shownKey = key;
         this.notice.setMessage(this.message(space, detail));

@@ -81,7 +81,7 @@ export class ExplorerAdapter {
     for (const observer of this.observers) observer.disconnect();
     this.observers = [];
     if (this.frame) {
-      cancelAnimationFrame(this.frame);
+      window.cancelAnimationFrame(this.frame);
       this.frame = 0;
     }
     this.clearOwnedClasses();
@@ -121,7 +121,11 @@ export class ExplorerAdapter {
   /** Coalesce bursts of mutations into a single pass. */
   private schedule(): void {
     if (this.frame) return;
-    this.frame = requestAnimationFrame(() => {
+    // Qualified with `window`, and cancelled on the same object in
+    // `unbind()`: a bare call resolves against whichever global the bundle
+    // was evaluated in, which is not the popout window an explorer can be
+    // living in. `obsidianmd/prefer-window-timers` asks for exactly this.
+    this.frame = window.requestAnimationFrame(() => {
       this.frame = 0;
       this.applyNow();
     });
@@ -194,7 +198,7 @@ export class ExplorerAdapter {
       const wrapper = title.parentElement;
       if (!path || !wrapper) continue;
 
-      const d = this.snapshot!.decisionFor(path);
+      const d = this.snapshot.decisionFor(path);
       // Left inferred: `CLS_ELSEWHERE` is `as const`
       // (selectors.ts) exactly like `CLS.scaffold`/`CLS.visitor`, so this
       // stays a literal-keyed object type, and `want[cls]` below only

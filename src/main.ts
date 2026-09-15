@@ -385,7 +385,7 @@ export default class SpacesPlugin extends Plugin {
 
     this.runtime = new RuntimeStateStore(
       {
-        get: (k) => this.app.loadLocalStorage(k),
+        get: (k): unknown => this.app.loadLocalStorage(k),
         set: (k, v) => this.app.saveLocalStorage(k, v),
       },
       (e) => {
@@ -464,7 +464,7 @@ export default class SpacesPlugin extends Plugin {
     // draw must not leave the header showing the superseded space.
     try {
       const token = this.defs.writeToken();
-      const snapshot = await this.loadData();
+      const snapshot: unknown = await this.loadData();
       await this.defs.onExternalChange(snapshot, token);
     } catch (e) {
       console.error("Spaces: could not apply an external data.json change", e);
@@ -1143,7 +1143,7 @@ export default class SpacesPlugin extends Plugin {
     if (spaces.length === 0) return;
     const order: ActiveSelection[] = [
       { kind: "all" },
-      ...spaces.map((s) => ({ kind: "space", id: s.id }) as ActiveSelection),
+      ...spaces.map((s) => ({ kind: "space", id: s.id }) satisfies ActiveSelection),
     ];
     // Resolved inside switchTo's queue, from the COMMITTED selection.
     // Reading `runtime.getSelection()` here made a key-repeated "Next space"
@@ -2411,7 +2411,7 @@ export default class SpacesPlugin extends Plugin {
         // The reused toast keeps its original dismiss time rather than being
         // re-timed: an accepted cost of not doing DOM surgery on host markup.
         const live = this.blockedDragNotice;
-        const reusable = live !== null && live.noticeEl.isConnected;
+        const reusable = live !== null && live.messageEl.isConnected;
         // Names whichever route actually exists right now, rather than one
         // that usually does. The row is conditional on a saved order
         // existing and this Notice is not: overriding without ever having
@@ -2480,7 +2480,7 @@ export default class SpacesPlugin extends Plugin {
           if (!Object.prototype.hasOwnProperty.call(by, sel.id)) {
             by[sel.id] = Object.create(null) as OrderMap;
           }
-          by[sel.id]![folderPath] = tidy;
+          by[sel.id][folderPath] = tidy;
         }
       });
     } catch (e) {

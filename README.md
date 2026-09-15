@@ -124,12 +124,12 @@ Settings → Spaces has two tabs. **Preferences** holds the toggles below; **Spa
 |---|---|---|
 | Show the space name above the file tree | On | A header row naming the active space |
 | Mark folder pinned spaces with a pin | Off | Adds a pin to that header for a folder pinned space; hover it for the folder |
-| Pin All to the left of the space strip | Off | Keeps **All** in place while the other icons scroll |
+| All stays at the left of the space strip | Off | Keeps **All** in place while the other icons scroll |
 | Assign a colour to new spaces | On | New spaces take the next palette colour. Off, they start neutral and you pick |
 | Show files you open that are not in this space | On | Whether visitors appear. Off, a non-member note you open stays hidden |
 | Ignored paths | Empty | One glob per line, hidden from every space. `*` matches within a path segment, `**` across segments. A file you added explicitly is still shown |
 | Allow reordering of space items | On | Whether dragging rows rearranges them inside a space |
-| Allow reordering in All | On | The same, for **All** |
+| Allow reordering outside spaces | On | The same, for **All** |
 | Restore tabs when switching spaces | Off | Whether each space restores its own tabs. On, switching also rearranges your panes; off changes nothing about which rows are visible |
 
 ## Your files and your data

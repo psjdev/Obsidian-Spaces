@@ -218,14 +218,14 @@ export function armSortMenuInjection(args: {
             return proxy;
           };
         }
-        const value = Reflect.get(target, prop, receiver);
+        const value: unknown = Reflect.get(target, prop, receiver);
         if (typeof value !== "function") return value;
         return (...callArgs: unknown[]): unknown => {
           const result = (value as (...a: unknown[]) => unknown).apply(target, callArgs);
           return result === item ? proxy : result;
         };
       },
-    }) as MenuItemLike;
+    });
     return proxy;
   };
 

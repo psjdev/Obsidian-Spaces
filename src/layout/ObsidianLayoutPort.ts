@@ -12,7 +12,7 @@ import type { WorkspaceLayoutPort } from "./LayoutCoordinator";
  */
 export function createObsidianLayoutPort(app: App): WorkspaceLayoutPort {
   return {
-    capture: () => app.workspace.getLayout() as LayoutBlob,
+    capture: () => app.workspace.getLayout(),
     restore: (layout: LayoutBlob) => app.workspace.changeLayout(layout),
     mainLeafCount: () => {
       let n = 0;

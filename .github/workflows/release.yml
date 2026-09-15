@@ -6,7 +6,12 @@ on:
       - "*"
 
 permissions:
+  # `contents` publishes the release; the other two sign for it. An attestation
+  # is what lets someone check that the main.js they downloaded came out of this
+  # repository at this commit, rather than off a maintainer machine.
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   release:
@@ -21,7 +26,16 @@ jobs:
 
       - run: npm ci
 
+      # Runs the lint the community directory runs, then tsc, then esbuild.
       - run: npm run build
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            main.js
+            manifest.json
+            styles.css
 
       - name: Create release
         env:

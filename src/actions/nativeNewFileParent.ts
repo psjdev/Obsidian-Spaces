@@ -77,12 +77,12 @@ export function installNativeCreateRedirect(
       // Only if OURS is still installed. A plugin that patched after us owns
       // the property now, and restoring over it would silently uninstall their
       // feature — the rule `nativeExplorerSort.unpatch` follows.
-      if ((fm as Patchable)[name] === mine) (fm as Patchable)[name] = original;
+      if (fm[name] === mine) fm[name] = original;
     }
   };
 
   for (const name of METHODS) {
-    const original = (fm as Patchable)[name];
+    const original = fm[name];
     // Undocumented, so a future Obsidian may not have it. Skipping is the
     // degradation; throwing here would take the whole plugin down on load.
     if (typeof original !== "function") continue;
@@ -94,7 +94,7 @@ export function installNativeCreateRedirect(
     };
     originals.set(name, original);
     wrappers.set(name, wrapper);
-    (fm as Patchable)[name] = wrapper;
+    fm[name] = wrapper;
   }
 
   patched.set(fm, { wrappers, originals, restore });

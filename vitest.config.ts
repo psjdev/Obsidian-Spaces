@@ -20,7 +20,9 @@ export default defineConfig({
     // Fills in browser globals jsdom lacks. Without it a handler that uses one
     // throws inside an event listener, which Vitest reports as an unhandled
     // error while the test still passes.
-    setupFiles: ["./tests/helpers/jsdomGaps.ts"],
+    // `obsidianDom` adds the methods Obsidian installs on the DOM prototypes
+    // (`instanceOf`), which no test environment provides.
+    setupFiles: ["./tests/helpers/jsdomGaps.ts", "./tests/helpers/obsidianDom.ts"],
     include: ["tests/**/*.test.ts"],
     environmentMatchGlobs: [
       ["tests/explorerAdapter.test.ts", "jsdom"],

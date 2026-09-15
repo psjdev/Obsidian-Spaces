@@ -123,13 +123,13 @@ export const noticeLog: Notice[] = [];
  *
  * So `hide()` here does NOT detach the element: doing so would model the
  * opposite of what was measured, and `main.ts:1862` (the missing-root Notice)
- * and `:2677` (the blocked-drag Notice) both read `noticeEl.isConnected`
+ * and `:2677` (the blocked-drag Notice) both read `messageEl.isConnected`
  * precisely to tell a live toast from a dismissed one.
  * Obsidian's own timer-driven dismissal is not modelled — nothing in `src/`
  * depends on it, and inventing a schedule would put a sleep in the suite.
  */
 export class Notice {
-  readonly noticeEl: HTMLElement;
+  readonly messageEl: HTMLElement;
   private readonly toastEl: HTMLElement;
   hidden = false;
 
@@ -140,21 +140,18 @@ export class Notice {
     const doc = requireDocument("new Notice()");
     this.toastEl = doc.createElement("div");
     this.toastEl.className = "notice";
-    this.noticeEl = doc.createElement("div");
-    this.noticeEl.className = "notice-message";
+    this.messageEl = doc.createElement("div");
+    this.messageEl.className = "notice-message";
     if (typeof message === "string") {
-      this.noticeEl.textContent = message;
+      this.messageEl.textContent = message;
     } else {
       // `appendChild` on a DocumentFragment moves its children — `message`
       // itself is left empty after this, same as it would be after any real
       // `appendChild(fragment)` call. Callers that need to inspect what was
-      // shown read `noticeEl`, not `message`, afterwards — `messageEl`
-      // (the non-deprecated replacement, `obsidian.d.ts` since 1.8.7) is
-      // NOT modelled here; the getter below throws rather than silently
-      // returning `undefined`.
-      this.noticeEl.appendChild(message);
+      // shown read `messageEl`, not `message`, afterwards.
+      this.messageEl.appendChild(message);
     }
-    this.toastEl.appendChild(this.noticeEl);
+    this.toastEl.appendChild(this.messageEl);
     doc.body.appendChild(this.toastEl);
     noticeLog.push(this);
   }
@@ -162,13 +159,13 @@ export class Notice {
   setMessage(message: string | DocumentFragment): this {
     this.message = message;
     if (typeof message === "string") {
-      this.noticeEl.textContent = message;
+      this.messageEl.textContent = message;
     } else {
       // Same DOM semantics as the constructor's DocumentFragment branch
       // (`appendChild` moves the fragment's children): clear whatever this
       // notice showed before, then move the new content in.
-      this.noticeEl.replaceChildren();
-      this.noticeEl.appendChild(message);
+      this.messageEl.replaceChildren();
+      this.messageEl.appendChild(message);
     }
     return this;
   }
@@ -179,17 +176,14 @@ export class Notice {
   }
 
   /**
-   * Final review, mechanical: `obsidian.d.ts` (since 1.8.7) declares this as
-   * the non-deprecated replacement for `noticeEl`, and this stub never
-   * modelled it — a plain missing field would read as `undefined` silently,
-   * which is the exact failure mode `notModelled()` exists to turn into a
-   * loud one everywhere else in this file.
+   * The deprecated spelling, and an alias rather than a second element:
+   * Obsidian's own `noticeEl` and `messageEl` are the same node, and a
+   * stub with two would let a test pass while reading the one the source
+   * does not write. `src/` uses `messageEl` throughout; this stays for any
+   * test still spelling it the old way.
    */
-  get messageEl(): HTMLElement {
-    return notModelled(
-      "Notice.messageEl",
-      "Only the deprecated `noticeEl` is modelled here; see this class's docstring."
-    );
+  get noticeEl(): HTMLElement {
+    return this.messageEl;
   }
 
   /** Detach the toast — a test-only affordance, not part of Obsidian's API. */
