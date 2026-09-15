@@ -197,7 +197,7 @@ export function validateForm(s: CreateFormState): FormFault | null {
     // click on a button they have to be told is still on.
     return {
       field: "root",
-      message: "select a folder to pin, or deselect 'Folder Pinned'.",
+      message: "select a folder to pin, or deselect 'Folder pinned'.",
     };
   }
   return null;

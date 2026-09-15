@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.1.4 — 2026-09-15
+
+Brings the plugin in line with Obsidian's developer policies and UI style guide.
+
+- Menu and button labels are sentence case, matching the rest of Obsidian:
+  "Rename space…", "Change space icon…", "Change space colour…", and the
+  "Folder pinned" mode in the create panel.
+- The settings tab no longer carries a support link. Funding is reachable the
+  way Obsidian intends, from the plugin's entry in the community list, and
+  nothing inside the plugin asks for money.
+
+The README's opening no longer reads as though "Obsidian Spaces" were a
+first-party product, and the requirements section now says what actually stands
+between Spaces and mobile.
+
+No behaviour change.
+
 ## 0.1.3 — 2026-09-15
 
 The author field now reads as a name rather than a username. It is shown as

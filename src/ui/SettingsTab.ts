@@ -28,15 +28,18 @@ import {
  * Ko-fi, Buy Me a Coffee, GitHub Sponsors or anything else; all of them are
  * just a URL, and the choice changes nothing here.
  *
- * When it is set, `manifest.json`'s `fundingUrl` must name the same address:
- * that is Obsidian's own mechanism, and it puts a Support link on the plugin's
- * entry in the community list without any code at all. `fundingUrl` takes
- * either one URL or a labelled set — this plugin uses the set (Ko-fi first,
- * GitHub Sponsors second), so this constant points at ONE of them, the primary
- * ask. `tests/manifest.test.ts` asserts it is one the manifest names, which is
- * the failure that actually matters: a settings link the listing never offers.
+ * Empty is what ships. Obsidian's developer policies treat a support prompt
+ * inside the plugin's own interface as something a README has to disclose, and
+ * `manifest.json`'s `fundingUrl` already does the same job the way Obsidian
+ * intends: a Support link on the community-list entry, no code, and nothing
+ * asking for money inside the settings tab. The renderer below stays because
+ * the decision is a URL, not a rewrite.
+ *
+ * Whoever sets it must name an address `fundingUrl` also names.
+ * `tests/manifest.test.ts` asserts exactly that, because the failure that
+ * matters is a settings link the listing never offers.
  */
-export const SUPPORT_URL = "https://ko-fi.com/psjdev";
+export const SUPPORT_URL = "";
 
 /**
  * Whether something outside spaces's own toggle is standing in the way of
@@ -280,8 +283,8 @@ export class SpacesSettingTab extends PluginSettingTab {
    * someone opens their settings. None of that buys anything a styled link
    * does not.
    *
-   * The README *does* carry a Ko-fi badge, and that is not a contradiction:
-   * it is an image on a web page GitHub already serves, loaded by a browser
+   * The README *does* carry support links, and that is not a contradiction:
+   * they are text on a web page GitHub already serves, read by a browser
    * nobody is trusting with their vault. The rule here is about what the
    * PLUGIN fetches, which is nothing — see `tests/noNetwork.test.ts`.
    */

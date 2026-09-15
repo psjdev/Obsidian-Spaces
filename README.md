@@ -4,11 +4,11 @@
 
 > **TL;DR**
 >
-> - Adds mini-workspace-like views to your vault
+> - Switch between curated views of your vault's folders and notes
 > - Reorder notes and folders by dragging
 > - Lightweight: no runtime dependencies, no network requests
 
-Obsidian `Spaces` supercharges a vault by allowing you to create contextually relevant groups of content as a *space*. A *space* is similar in spirit to a Notion teamspace: a view of your vault scoped to one piece of work, with its own contents and its own tabs. `Spaces` changes what and how you see your vault, not what your vault contains.
+`Spaces` is a plugin for Obsidian that supercharges a vault by letting you gather contextually relevant content into a *space*. A *space* is similar in spirit to a Notion teamspace: a view of your vault scoped to one piece of work, with its own contents and its own tabs. It changes what and how you see your vault, not what your vault contains.
 
 Spaces are a lens, not a reorganisation. A note or folder lives at one real path, and can belong to zero or more spaces. Nothing here renames, moves or deletes anything in your vault.
 
@@ -53,7 +53,7 @@ The two overlap on tabs, so Spaces defers. If the core Workspaces plugin is enab
 - **Obsidian 1.13.0 or later**
 - **Desktop only.** The manifest declares `isDesktopOnly: true`, so Obsidian does not offer the plugin on mobile
 
-Mobile support is on the roadmap.
+Mobile support is on the roadmap. Two things stand in the way today: reordering rides Obsidian's own HTML5 drag events, which never fire from a touch gesture, and the filtering works against the desktop file explorer's DOM, which mobile lays out differently. Both are solvable, neither is verified on a phone yet, and the manifest stays honest about that until they are.
 
 ## Installing
 
@@ -75,13 +75,13 @@ If your vault uses a custom config folder, substitute it for `.obsidian`.
 3. Type a name. Optionally click the dashed square to the left of the name to choose an icon, and **Choose icon colour** to set its colour.
 4. Choose what goes in it:
    - **Curated** opens a searchable tree of your vault. Click any notes and folders to include them.
-   - **Folder Pinned** shows folders only; pick exactly one to pin the space to.
+   - **Folder pinned** shows folders only; pick exactly one to pin the space to.
    - Both are optional. A space with just a name is a valid empty curated space.
 5. Click **Create space**. Spaces switches you into it, and the file tree narrows to match.
 
 | 1. Name it | 2. Curate it | 3. Pin it to a folder |
 |---|---|---|
-| <img src="docs/media/create-name.png" width="240" alt="The creation form with the name Weekend typed and a teal tent chosen as the space's icon."> | <img src="docs/media/create-curated.png" width="240" alt="The same form with Curated selected, showing a searchable tree of the vault with a folder and three notes picked out."> | <img src="docs/media/create-folder.png" width="240" alt="The same form with Folder Pinned selected, showing folders only and exactly one of them chosen."> |
+| <img src="docs/media/create-name.png" width="240" alt="The creation form with the name Weekend typed and a teal tent chosen as the space's icon."> | <img src="docs/media/create-curated.png" width="240" alt="The same form with Curated selected, showing a searchable tree of the vault with a folder and three notes picked out."> | <img src="docs/media/create-folder.png" width="240" alt="The same form with Folder pinned selected, showing folders only and exactly one of them chosen."> |
 
 Click **All** to leave the space and see the whole vault again.
 
@@ -93,11 +93,11 @@ Right-click a row in the file tree:
 - Inside a space, **Remove from *space*** removes a member. A row that is in the space because you added its parent folder shows a disabled entry naming the folder it came from. Remove the folder, or use **Stop showing here** to dismiss a visitor.
 - On a folder in **All**, **Create folder pinned space** builds a space pinned to it in one step.
 
-Right-click a space's icon in the switcher strip for **Rename Space…**, **Change Space Icon…**, **Change Space Colour…**, and **Restore saved ordering**.
+Right-click a space's icon in the switcher strip for **Rename space…**, **Change space icon…**, **Change space colour…**, and **Restore saved ordering**.
 
 | A row in the file tree | A space's icon in the strip |
 |---|---|
-| <img src="docs/media/menu-add-to-space.png" width="360" alt="Obsidian's own folder menu with two added entries: Add to space, opened to show the spaces that can take this folder, and Create folder pinned space."> | <img src="docs/media/menu-space-icon.png" width="360" alt="The menu on a space icon: Rename Space, Change Space Icon and Change Space Colour."> |
+| <img src="docs/media/menu-add-to-space.png" width="360" alt="Obsidian's own folder menu with two added entries: Add to space, opened to show the spaces that can take this folder, and Create folder pinned space."> | <img src="docs/media/menu-space-icon.png" width="360" alt="The menu on a space icon: Rename space, Change space icon and Change space colour."> |
 
 Only spaces that can take the row are offered: a folder pinned space is a window onto its own folder, so it never appears in **Add to space**.
 

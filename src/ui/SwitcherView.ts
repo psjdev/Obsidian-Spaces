@@ -382,7 +382,7 @@ export class SwitcherView {
         menu.addItem((mi) =>
           mi
             .setIcon("pencil")
-            .setTitle("Rename Space…")
+            .setTitle("Rename space…")
             .onClick(() => {
               this.show(
                 openRenamePopover({
@@ -396,7 +396,7 @@ export class SwitcherView {
         menu.addItem((mi) =>
           mi
             .setIcon("image")
-            .setTitle("Change Space Icon…")
+            .setTitle("Change space icon…")
             .onClick(() => {
               // Anchored to the switcher item itself, so the popover opens
               // where the space lives rather than in the middle of the app.
@@ -410,7 +410,7 @@ export class SwitcherView {
         menu.addItem((mi) =>
           mi
             .setIcon("palette")
-            .setTitle("Change Space Colour…")
+            .setTitle("Change space colour…")
             .onClick(() => {
               this.show(
                 openColorPicker({

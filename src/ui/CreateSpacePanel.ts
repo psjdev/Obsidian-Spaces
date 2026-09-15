@@ -785,7 +785,7 @@ export class CreateSpacePanel {
     };
 
     modes.appendChild(modeBtn(false, "Curated", "list-plus"));
-    modes.appendChild(modeBtn(true, "Folder Pinned", "folder"));
+    modes.appendChild(modeBtn(true, "Folder pinned", "folder"));
     el.appendChild(modes);
 
     if (this.itemsOpen) {
@@ -879,7 +879,7 @@ export class CreateSpacePanel {
       if (text instanceof HTMLElement) text.textContent = this.modeSummary(folderMode, label);
     };
     set("mode-curate", false, "Curated");
-    set("mode-folder", true, "Folder Pinned");
+    set("mode-folder", true, "Folder pinned");
   }
 
   /**
