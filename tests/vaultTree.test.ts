@@ -1,0 +1,236 @@
+import { describe, expect, it } from "vitest";
+import { ancestorsOf, buildVaultTree, visibleRows } from "../src/ui/vaultTree";
+
+/**
+ * Layer 1: what the folder picker shows, with the drawing left to the panel.
+ *
+ * Shapes are the fixture vault's (Obsidian 1.13.7): a handful of top-level
+ * folders, `Projects/Console 2030/Hardware` three deep.
+ */
+const folder = (path: string) => ({ path, kind: "folder" as const });
+const file = (path: string) => ({ path, kind: "file" as const });
+
+const VAULT = [
+  folder("Archive"),
+  file("Archive/Bravo.md"),
+  folder("Bulk"),
+  folder("Projects"),
+  folder("Projects/Console 2030"),
+  folder("Projects/Console 2030/Hardware"),
+  folder("Projects/Hardware"),
+  file("Projects/Roadmap.md"),
+  folder("Reference"),
+  file("Top.md"),
+];
+
+const none = {
+  expanded: new Set<string>(),
+  filter: "",
+  selected: new Set<string>(),
+  foldersOnly: false,
+};
+const paths = (rows: readonly { path: string }[]): string[] => rows.map((r) => r.path);
+
+describe("buildVaultTree", () => {
+  it("nests by path segment", () => {
+    const tree = buildVaultTree(VAULT);
+    expect(tree.map((n) => n.path)).toEqual(["Archive", "Bulk", "Projects", "Reference", "Top.md"]);
+    const projects = tree.find((n) => n.path === "Projects")!;
+    // Folders first, then files — the explorer's own order.
+    expect(projects.children.map((n) => n.name)).toEqual([
+      "Console 2030",
+      "Hardware",
+      "Roadmap.md",
+    ]);
+  });
+
+  it("sorts each level on its own", () => {
+    const tree = buildVaultTree([folder("Zebra"), folder("Apple"), folder("Zebra/b"), folder("Zebra/a")]);
+    expect(tree.map((n) => n.name)).toEqual(["Apple", "Zebra"]);
+    expect(tree[1].children.map((n) => n.name)).toEqual(["a", "b"]);
+  });
+
+  it("invents a missing intermediate rather than dropping its children", () => {
+    // Obsidian always has the parent, but a picker that silently loses folders
+    // because of one absent path is worse than one that shows a bridge node.
+    const tree = buildVaultTree([folder("a/b/c")]);
+    expect(tree.map((n) => n.path)).toEqual(["a"]);
+    expect(tree[0].children[0].path).toBe("a/b");
+    expect(tree[0].children[0].children[0].path).toBe("a/b/c");
+  });
+
+  it("survives an empty vault", () => {
+    expect(buildVaultTree([])).toEqual([]);
+  });
+
+  it("ignores duplicates", () => {
+    expect(buildVaultTree([folder("a"), folder("a")]).length).toBe(1);
+  });
+});
+
+describe("visibleRows", () => {
+  const tree = buildVaultTree(VAULT);
+
+  it("starts collapsed — top level only", () => {
+    expect(paths(visibleRows(tree, none))).toEqual(["Archive", "Bulk", "Projects", "Reference", "Top.md"]);
+  });
+
+  it("shows a node's children once it is expanded, but not its grandchildren", () => {
+    const rows = visibleRows(tree, { ...none, expanded: new Set(["Projects"]) });
+    expect(paths(rows)).toEqual([
+      "Archive",
+      "Bulk",
+      "Projects",
+      "Projects/Console 2030",
+      "Projects/Hardware",
+      "Projects/Roadmap.md",
+      "Reference",
+      "Top.md",
+    ]);
+  });
+
+  it("carries the depth the panel needs to indent by", () => {
+    const rows = visibleRows(tree, { ...none, expanded: new Set(["Projects"]) });
+    expect(rows.find((r) => r.path === "Projects")!.depth).toBe(0);
+    expect(rows.find((r) => r.path === "Projects/Hardware")!.depth).toBe(1);
+  });
+
+  it("marks which rows have children, so only those draw a caret", () => {
+    const rows = visibleRows(tree, none);
+    expect(rows.find((r) => r.path === "Projects")!.hasChildren).toBe(true);
+    // A folder holding only files still has children — in curated mode those
+    // files are pickable, so the caret has to be there to reach them.
+    expect(rows.find((r) => r.path === "Archive")!.hasChildren).toBe(true);
+    expect(rows.find((r) => r.path === "Top.md")!.hasChildren).toBe(false);
+  });
+
+  it("marks every selected row — curated mode picks many", () => {
+    const rows = visibleRows(tree, {
+      ...none,
+      expanded: new Set(["Projects"]),
+      selected: new Set(["Projects/Hardware", "Projects/Roadmap.md"]),
+    });
+    expect(rows.filter((r) => r.selected).map((r) => r.path)).toEqual([
+      "Projects/Hardware",
+      "Projects/Roadmap.md",
+    ]);
+  });
+
+  describe("filtering", () => {
+    it("reveals a deep match with its ancestors, opened to it", () => {
+      const rows = visibleRows(tree, { ...none, filter: "hardware" });
+      expect(paths(rows)).toEqual([
+        "Projects",
+        "Projects/Console 2030",
+        "Projects/Console 2030/Hardware",
+        "Projects/Hardware",
+      ]);
+    });
+
+    it("expands ancestors of a match whatever the user had collapsed", () => {
+      // The point of typing is to be shown the thing; honouring a stale
+      // collapsed state would hide the only row that matched.
+      const rows = visibleRows(tree, { ...none, filter: "console" });
+      const projects = rows.find((r) => r.path === "Projects")!;
+      expect(projects.expanded).toBe(true);
+    });
+
+    it("is case-insensitive and matches on the name", () => {
+      expect(paths(visibleRows(tree, { ...none, filter: "ARCHIVE" }))).toEqual([
+        "Archive",
+        "Archive/Bravo.md",
+      ]);
+    });
+
+    it("matches on an ancestor's name too, keeping its subtree available", () => {
+      // Typing a parent's name is a way to browse INTO it, so its children
+      // stay reachable rather than being filtered out from under it.
+      const rows = visibleRows(tree, { ...none, filter: "projects" });
+      expect(paths(rows)).toContain("Projects");
+      expect(paths(rows)).toContain("Projects/Console 2030");
+    });
+
+    it("shows nothing when nothing matches", () => {
+      expect(visibleRows(tree, { ...none, filter: "zzz" })).toEqual([]);
+    });
+
+    it("ignores surrounding whitespace", () => {
+      expect(paths(visibleRows(tree, { ...none, filter: "  archive  " }))).toEqual([
+        "Archive",
+        "Archive/Bravo.md",
+      ]);
+    });
+  });
+});
+
+describe("ancestorsOf", () => {
+  // Used to open a pre-filled selection into view: the right-click entry lands
+  // with a root already chosen, and a collapsed tree would hide it.
+  it("lists every ancestor, nearest last", () => {
+    expect(ancestorsOf("Projects/Console 2030/Hardware")).toEqual([
+      "Projects",
+      "Projects/Console 2030",
+    ]);
+  });
+
+  it("excludes the node itself — it is opened INTO, not opened", () => {
+    expect(ancestorsOf("Projects")).toEqual([]);
+  });
+
+  it("has nothing to say about an empty path", () => {
+    expect(ancestorsOf("")).toEqual([]);
+  });
+});
+
+describe("foldersOnly (the folder-space mode)", () => {
+  const tree = buildVaultTree(VAULT);
+
+  it("hides files, so only a folder can become a root", () => {
+    const rows = visibleRows(tree, { ...none, foldersOnly: true });
+    expect(paths(rows)).toEqual(["Archive", "Bulk", "Projects", "Reference"]);
+  });
+
+  it("hides files nested inside an expanded folder too", () => {
+    const rows = visibleRows(tree, {
+      ...none,
+      foldersOnly: true,
+      expanded: new Set(["Projects"]),
+    });
+    expect(paths(rows)).toEqual([
+      "Archive",
+      "Bulk",
+      "Projects",
+      "Projects/Console 2030",
+      "Projects/Hardware",
+      "Reference",
+    ]);
+  });
+
+  it("drops a folder that only survived because a FILE beneath it matched", () => {
+    // "bravo" is a file. With files hidden there is nothing left to show, so
+    // `Archive` must not linger as an empty branch.
+    const rows = visibleRows(tree, { ...none, foldersOnly: true, filter: "bravo" });
+    expect(rows).toEqual([]);
+  });
+
+  it("still matches folders while filtering", () => {
+    const rows = visibleRows(tree, { ...none, foldersOnly: true, filter: "hardware" });
+    expect(paths(rows)).toEqual([
+      "Projects",
+      "Projects/Console 2030",
+      "Projects/Console 2030/Hardware",
+      "Projects/Hardware",
+    ]);
+  });
+
+  it("carries the kind, so the panel can draw a file differently", () => {
+    const rows = visibleRows(tree, none);
+    expect(rows.find((r) => r.path === "Top.md")!.kind).toBe("file");
+    expect(rows.find((r) => r.path === "Archive")!.kind).toBe("folder");
+  });
+
+  it("never lets a file claim children", () => {
+    const rows = visibleRows(tree, none);
+    expect(rows.find((r) => r.path === "Top.md")!.hasChildren).toBe(false);
+  });
+});

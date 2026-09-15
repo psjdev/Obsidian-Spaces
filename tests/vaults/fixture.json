@@ -1,0 +1,57 @@
+{
+  "$comment": [
+    "The fixture vault, described rather than committed as ~60 loose files.",
+    "`prepare.mjs` materialises this into a temp directory. Never into the user's vault.",
+    "",
+    "Every entry here exists to exercise something specific; see `why` on each group.",
+    "Names are deliberately chosen so a custom order is VISIBLY different from every",
+    "native sort order (alphabetical, mtime, ctime). A fixture whose intended order",
+    "happens to match alphabetical cannot prove ordering works at all — that is the",
+    "same class of mistake as a test asserting a value it also supplied (spec 10.5.1)."
+  ],
+  "folders": [
+    {
+      "path": "Projects",
+      "why": "Interleaving: files and folders as siblings in one parent, which spec 20.2 requires a total order to support.",
+      "files": ["Roadmap.md", "Budget.md"],
+      "children": [
+        {
+          "path": "Projects/Console 2030",
+          "why": "Nested depth, and a multi-word name so the folder autocomplete's full-path matching has something real to match (spec 19.4).",
+          "files": ["Overview.md", "Schedule.md", "Risks.md"],
+          "children": [
+            {
+              "path": "Projects/Console 2030/Hardware",
+              "why": "Third level, so scaffold rendering has a chain to build.",
+              "files": ["Board.md", "Datasheet.md"]
+            }
+          ]
+        },
+        {
+          "path": "Projects/Atlas",
+          "why": "A second sibling folder, so folder-versus-folder reordering is testable.",
+          "files": ["Kickoff.md"]
+        }
+      ]
+    },
+    {
+      "path": "Archive",
+      "why": "The cross-folder drag TARGET. Spec 20.4's cross-folder drop moves a real note; this is where it moves to, and it starts nearly empty so the arrival is unambiguous.",
+      "files": ["Old Notes.md"]
+    },
+    {
+      "path": "Reference",
+      "why": "Ordinary sibling group of five files with names whose alphabetical order (Alpha, Bravo, Charlie, Delta, Echo) is known, so a custom order is provably not alphabetical.",
+      "files": ["Alpha.md", "Bravo.md", "Charlie.md", "Delta.md", "Echo.md"]
+    },
+    {
+      "path": "Bulk",
+      "why": "THE WINDOWING TEST. Spec 20.5 names the one unsettled risk: CSS `order` is only correct among rows simultaneously in the DOM, and the pane fits roughly 28 rows. 40 files forces the virtual scroller to window this container, which the real vault could not do (its largest candidate folder was a collapsed 106-file attachments folder). This is the single most valuable folder in the fixture.",
+      "generate": { "count": 40, "pattern": "Item %02d.md" }
+    }
+  ],
+  "rootFiles": [
+    "Inbox.md",
+    "Daily.md"
+  ]
+}

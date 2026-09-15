@@ -1,0 +1,982 @@
+/* Owned by spaces. The classes go on the `.tree-item` wrapper (that is the
+   element the adapter mutates), but a wrapper contains BOTH its own row
+   (`.tree-item-self`) and every descendant row (`.tree-item-children`).
+   De-emphasis must NOT cascade to descendants: `opacity` establishes a
+   stacking context that applies to the whole subtree, and a descendant
+   cannot opt back out of an ancestor's opacity. A member note nested under a
+   scaffold folder was therefore dimmed with no way to undo it. So every
+   de-emphasis rule targets the row's own element only. */
+/* Three states must be distinguishable at a glance (§5.5, §8):
+     member   — full opacity, upright. It belongs to this space.
+     visitor  — dimmed and italic. Revealed by being opened; it does NOT
+                belong to this space. The row lasts as long as the reveal
+                (§5.5.1): it goes when the user closes the file, dismisses
+                the row, becomes a member of this space (then it renders as
+                one), or -- if spaces's own layout restore closed the tab --
+                at the next space switch.
+     scaffold — most dimmed, upright. Structure only, present so a member
+                below it is reachable; not a member itself.
+   Visitor dimming is required by §5.5 ("temporarily reveals its real path,
+   dimmed") and was previously absent — visitors carried only italics and
+   merely inherited the dimming of any scaffold ancestor above them, so a
+   visitor at the vault root looked identical to a member. */
+.spaces-scaffold > .tree-item-self { opacity: 0.45; }
+.spaces-visitor > .tree-item-self { opacity: 0.62; font-style: italic; }
+
+/* The elsewhere group's boundary (folder-space design §5). A border on the
+   first row rather than a separator element: the tree is Obsidian's, and a
+   row we already class costs nothing to draw on. Unlike the de-emphasis pair
+   above, this targets the WRAPPER itself, not `> .tree-item-self`: a border/
+   margin/padding does not cascade into a subtree the way `opacity` does, so
+   there is no descendant to protect from it, and the wrapper is the box whose
+   top edge sits at the visual boundary this rule draws. */
+.spaces-elsewhere {
+  border-top: 1px solid var(--background-modifier-border);
+  margin-top: 6px;
+  padding-top: 6px;
+}
+
+/* The effective-state override on "Restore tabs when switching spaces" (§9.4).
+   Uses Obsidian's own error tokens so it tracks the active theme in both light
+   and dark rather than hard-coding a red. */
+.spaces-restore-warning {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--text-error);
+  border-radius: 6px;
+  background: var(--background-modifier-error);
+}
+.spaces-restore-warning strong { color: var(--text-error); }
+
+/* §19.2: the row is a fixed frame; only the rail scrolls, so the create
+   control stays reachable no matter how many spaces exist. */
+.spaces-switcher {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  padding: 6px 8px;
+  border-top: 1px solid var(--background-modifier-border);
+  flex: 0 0 auto;
+}
+.spaces-switcher-rail {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  flex: 1 1 auto;
+  /* §9.11: anchors the reorder insertion line, which is positioned in the
+     rail's CONTENT coordinates so it travels with the icons as the rail
+     scrolls. Unlike .nav-files-container, this is not already relative. */
+  position: relative;
+}
+/* §9.11: vertical, because the strip is horizontal — the file tree's line is
+   the same idea rotated. Sized to the icon, not the strip: a full-height rule
+   would read as dividing the pane rather than marking a gap between icons. */
+.spaces-space-drop-line {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 28px;
+  border-radius: 1px;
+  background-color: var(--interactive-accent);
+  pointer-events: none;
+  z-index: 1;
+}
+/* §9.11: the icon being dragged. Obsidian marks its own dragged rows the same
+   way, so the strip reads as part of the app rather than a bolt-on. */
+.spaces-switcher-item.is-being-dragged { opacity: 0.35; }
+/* §9.10: the boundary between pinned All and the scrolling rail. Rendered
+   only while something is pinned — a permanent rule that sometimes separates
+   nothing is worse than no rule. `align-self: stretch` rather than a fixed
+   height so it tracks the strip's content box if the icons ever resize. */
+.spaces-switcher-divider {
+  flex: 0 0 auto;
+  width: 1px;
+  align-self: stretch;
+  margin: 2px 2px;
+  background: var(--background-modifier-border);
+}
+.spaces-switcher-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  flex: 0 0 auto;
+  opacity: 0.55;
+}
+.spaces-switcher-item:hover { opacity: 0.85; }
+
+.spaces-switcher-item:focus-visible,
+.spaces-switcher-add:focus-visible,
+.spaces-space-header-icon[role="button"]:focus-visible,
+.spaces-space-header-name[role="button"]:focus-visible {
+  outline: 1px solid var(--interactive-accent);
+  outline-offset: -1px;
+}
+.spaces-switcher-item.is-active {
+  opacity: 1;
+  background: var(--background-modifier-hover);
+  box-shadow: inset 0 0 0 2px currentColor;
+}
+.spaces-switcher-item.is-pending { opacity: 1; animation: spaces-pulse 0.6s ease-in-out infinite; }
+@keyframes spaces-pulse { 50% { opacity: 0.4; } }
+.spaces-switcher-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  flex: 0 0 auto;
+  opacity: 0.55;
+}
+.spaces-switcher-add:hover { opacity: 1; background: var(--background-modifier-hover); }
+
+/* §19.3: an overlay, not a replacement. The host is already
+   position: relative, so this anchors with no host mutation, and being a
+   sibling of .nav-files-container it cannot trip the adapter's health check. */
+.spaces-create-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 12px 12px;
+  background: var(--background-secondary);
+  overflow-y: auto;
+}
+/* The gap is a starting value, not the answer: `alignToRibbon`
+   (CreateSpacePanel.ts) measures the real ribbon and overwrites
+   `--spaces-title-gap` so the name field lands on an icon's centre whatever
+   the theme's pitch and metrics are. This value is what stands when there is
+   no ribbon to measure — hidden from settings, or mobile. */
+.spaces-create-title {
+  font-weight: 600;
+  text-align: center;
+  font-size: 17px;
+  margin-bottom: var(--spaces-title-gap, 22px);
+}
+/* Only the picker may absorb the column's leftover space. Everything else
+   keeps its natural height: `flex-shrink` defaults to 1, so opening the picker
+   used to squeeze the theme button from 30px to 26px and ride every row below
+   it 4px up the pane — a visible jump for a click that should only reveal
+   something. Measured in the fixture, Obsidian 1.13.7. */
+.spaces-create-panel > *:not(.spaces-create-items) {
+  flex: 0 0 auto;
+}
+
+.spaces-create-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+/* What a failed Create points at. Obsidian's own error variables, so it reads
+   as an error in any theme rather than a hardcoded red. */
+/* The focus states are listed explicitly, and that is the whole point of this
+   rule rather than a detail of it. `showFault` focuses the control it marks,
+   and Obsidian's `.text-input:focus` carries the same specificity as a bare
+   `.is-invalid` — so the red painted for one frame and the focus ring took it
+   straight back, which read as a flash. Adding the pseudo-class wins the tie
+   and the mark survives until the user acts on the control. */
+.spaces-create-panel .text-input.is-invalid,
+.spaces-create-panel .text-input.is-invalid:focus,
+.spaces-create-panel .text-input.is-invalid:focus-visible,
+.spaces-create-tree.is-invalid,
+.spaces-create-tree.is-invalid:focus,
+.spaces-create-tree.is-invalid:focus-visible {
+  border-color: var(--text-error);
+  box-shadow: 0 0 0 2px var(--text-error);
+}
+
+/* The two kinds, side by side. A segmented pair rather than a checkbox: the
+   choice cannot be changed after creation, so neither option should be the one
+   you get by not noticing. Layout only — the buttons themselves inherit
+   Obsidian's chrome, same as Cancel. */
+.spaces-create-modes {
+  display: flex;
+  gap: 6px;
+}
+.spaces-create-mode {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.spaces-create-mode > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.spaces-create-mode.is-active {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+.spaces-create-mode.is-active .spaces-create-theme-icon { color: inherit; }
+
+/* The item picker's view: fills the space between its button and the pinned
+   actions, so the tree gets the whole pane rather than a fixed box. */
+.spaces-create-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+/* The tree. `flex: 1` rather than a fixed max-height, so it grows into the
+   pane and scrolls only when it runs out of room. */
+/* The picker is a view of the file tree, so it is typeset as one.
+   `--nav-item-size` and `--nav-item-weight` are the variables the explorer's
+   own rows read, which is why they are used here rather than the 13px they
+   happen to resolve to today: a theme that resizes the file tree resizes this
+   with it. Without this the box inherited the pane's `--text-normal` 15px and
+   sat two pixels larger than the tree it mirrors. Set on the container so the
+   rows, the caret and the empty-state message all follow; the filter field
+   above is a sibling, so it keeps Obsidian's input sizing. */
+.spaces-create-tree {
+  flex: 1 1 auto;
+  min-height: 80px;
+  overflow-y: auto;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s, 4px);
+  padding: 4px;
+  font-size: var(--nav-item-size);
+  font-weight: var(--nav-item-weight);
+}
+.spaces-create-tree-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+  border-radius: var(--radius-s, 4px);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.spaces-create-tree-row:hover { background: var(--background-modifier-hover); }
+.spaces-create-tree-row:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--text-accent);
+}
+.spaces-create-tree-row.is-selected {
+  background: var(--background-modifier-active-hover, var(--background-modifier-hover));
+  color: var(--text-accent);
+  font-weight: 600;
+}
+/* Reserved even on a childless row, so names stay in one column. */
+.spaces-create-tree-caret {
+  flex: 0 0 auto;
+  width: 16px; height: 16px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+}
+.spaces-create-tree-caret svg { width: 14px; height: 14px; }
+.spaces-create-tree-name { overflow: hidden; text-overflow: ellipsis; }
+.spaces-create-tree-icon {
+  flex: 0 0 auto;
+  display: flex; align-items: center;
+  color: var(--text-muted);
+}
+.spaces-create-tree-icon svg { width: 14px; height: 14px; }
+.spaces-create-tree-row.is-selected .spaces-create-tree-icon { color: inherit; }
+/* Sits below the rows, inside the scroll box but outside the tree itself. A
+   status line, not a row: it is not selectable and takes no focus. */
+.spaces-create-tree-more {
+  padding: 4px;
+  color: var(--text-muted);
+  font-size: 0.9em;
+  border-top: 1px solid var(--background-modifier-border);
+}
+.spaces-create-tree-empty {
+  padding: 8px 4px;
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+/* The theme button replaces the old swatch row: full width under the name,
+   so it reads as an action rather than seven unexplained circles. The brush
+   carries the current colour (set inline from state), so the button shows the
+   choice as well as offering to change it. */
+/* Layout only. Everything else -- background, border, radius, hover, active,
+   focus ring -- is Obsidian's default button chrome, inherited by NOT being
+   overridden, so this matches Cancel exactly and keeps matching it if the
+   theme changes. */
+.spaces-create-theme {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+/* The muted default, shared with the mode buttons' icons and matching the
+   icon placeholder's dashed box (`.spaces-create-iconbtn.is-empty`, below).
+   Nothing overrides it: the brush labels the action and is not a swatch. The
+   chosen colour shows on the space's own icon instead, which is the thing
+   being coloured. */
+.spaces-create-theme-icon {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+}
+.spaces-create-theme-icon svg { width: 16px; height: 16px; }
+/* The icon button sits inside the name row, left of the input, so the two
+   read as one field. `.is-empty` is the pre-choice state: the dashed plus is
+   drawn by CreateSpacePanel as inline SVG in `currentColor`, so the colour
+   decision lives here rather than in the markup. */
+.spaces-create-iconbtn {
+  flex: 0 0 auto;
+  width: 28px; height: 28px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--text-normal);
+}
+.spaces-create-iconbtn svg { width: 20px; height: 20px; }
+.spaces-create-iconbtn:hover { background: var(--background-modifier-hover); }
+.spaces-create-iconbtn:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--text-accent);
+}
+.spaces-create-iconbtn.is-empty { color: var(--text-muted); }
+.spaces-create-iconbtn.is-empty:hover { color: var(--text-normal); }
+
+/* Pinned to the bottom, as in the reference. */
+/* Fix round 2, Important 5: margin-top: auto only pins to the bottom while
+   content fits. .spaces-create-panel scrolls (overflow-y: auto), and a
+   title + name row + theme + two mode buttons + an open item picker in a
+   narrow sidebar is a real, computed-layout case (§10.5.1) where it doesn't —
+   the buttons scroll out of view with it. position: sticky keeps them pinned to the
+   viewport of the scroll container instead of the document flow, and the
+   background stops scrolled content showing through underneath. */
+.spaces-create-actions {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: sticky;
+  bottom: 0;
+  padding-top: 6px;
+  background: var(--background-secondary);
+}
+
+/* §20.7: an ordering seam that this Obsidian version does not expose is said
+   out loud next to its toggle, the same treatment §9.4 gives a blocked restore. */
+.spaces-setting-warning {
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  color: var(--text-error);
+  background-color: var(--background-modifier-error);
+}
+
+/* Backlog Q: the switch flicker. Obsidian rebuilds the explorer during a space
+   switch and paints the COMPLETE UNFILTERED tree ~43ms before spaces can class
+   it (measured). Hiding the tree for the duration replaces a flash of the wrong
+   content with a brief blank.
+
+   `visibility`, not `display`: no layout thrash, and the scroll position survives
+   (I4). Scoped to the tree only, so the nav header and the switcher strip stay
+   put and the pane does not blink as a whole.
+
+   SJ-32: and scoped to the FILE EXPLORER's tree. `.nav-files-container` is a
+   class other views and plugins wear to look native, and the mask has nothing
+   to say about them — the flicker being covered is Obsidian rebuilding the
+   file explorer, and the class on `document.body` (see setSwitchMask: every
+   element inside the pane is replaced during a switch, so the body is the only
+   node that cannot go stale) is what makes the rule window-wide unless the
+   selector narrows it. The pane selector is `SEL.fileExplorerPane`; this file
+   cannot import it, which is the coupling `tests/stylesCoupling.test.ts`
+   exists to hold.
+
+   **Scoped by pane TYPE, and deliberately still plural.** SJ-09 binds, patches
+   and filters EVERY file-explorer leaf in the main window, so there is more
+   than one tree to cover and every one of them flashes. Narrowing this to
+   "the" explorer container — a `:first-of-type`, or a rule written against a
+   single element — would put the flash back in the second pane. A descendant
+   combinator under the pane type is what gets both properties at once, and
+   `tests/stylesCoupling.test.ts` holds each half separately. */
+body.spaces-switching
+  .workspace-leaf-content[data-type="file-explorer"]
+  .nav-files-container {
+  visibility: hidden;
+}
+
+/* §20.4: the insertion line. Absolute inside .nav-files-container, which is
+   already position:relative (measured) — no host style needed to anchor it. */
+.spaces-drop-line {
+  position: absolute;
+  /* left and width are set inline from the target row's .tree-item WRAPPER box
+     (§20.4): the line belongs to the row it describes, and an indented row's
+     bubble does not start at the pane's edge. The wrapper is what carries the
+     indent — `.tree-item-self` is deliberately stretched back to the pane edge
+     by Obsidian, so measuring it drew a pane-wide line at every depth. */
+  height: 2px;
+  margin-top: -1px;
+  background-color: var(--interactive-accent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* §9.7: the icon picker. A small popover anchored above the switcher strip,
+   NOT a centred modal — see IconPickerPopover's header for why. On body with
+   position:fixed, because the sidebar clips its own overflow and a popover
+   above the bottom strip is exactly what would be cut off. */
+.spaces-icon-popover {
+  position: fixed;
+  z-index: var(--layer-menu);
+  width: 296px;
+  padding: 8px;
+  border-radius: var(--radius-m);
+  background-color: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  box-shadow: var(--shadow-s);
+}
+
+.spaces-icon-popover .spaces-icon-search {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.spaces-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.spaces-icon-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  color: var(--text-normal);
+}
+
+.spaces-icon-cell:hover,
+.spaces-icon-cell:focus-visible {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.spaces-icon-cell.is-selected {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.spaces-icon-empty {
+  grid-column: 1 / -1;
+  padding: 10px 4px;
+  color: var(--text-normal);
+  font-size: var(--font-ui-smaller);
+}
+
+/* §9.8: the colour picker. Same shell as the icon picker (AnchoredPopover). */
+.spaces-color-popover {
+  position: fixed;
+  z-index: var(--layer-menu);
+  width: 224px;
+  padding: 8px;
+  border-radius: var(--radius-m);
+  background-color: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  box-shadow: var(--shadow-s);
+}
+
+.spaces-color-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.spaces-color-cell {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.spaces-color-cell:hover,
+.spaces-color-cell:focus-visible {
+  border-color: var(--background-modifier-border-hover);
+}
+
+.spaces-color-cell.is-selected {
+  border-color: var(--text-normal);
+}
+
+/* The + reads as one more slot in the palette, not a control beside it. */
+.spaces-color-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-normal);
+  background-color: var(--background-modifier-hover);
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* §9.8: deleting a custom chip. Palette colours never get one — they are
+   immutable, and the picker's floor. */
+.spaces-color-cell {
+  position: relative;
+}
+
+.spaces-color-remove {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-on-accent);
+  background-color: var(--background-modifier-error);
+  cursor: pointer;
+  /* Slightly smaller than the badge so the glyph reads as sitting inside it
+     rather than filling it. Sized here rather than by font metrics: the icon
+     is an SVG, so this is its actual painted size. */
+  --icon-size: 9px;
+  --icon-stroke: 2.5px;
+}
+
+.spaces-color-remove .svg-icon {
+  /* Belt and braces: some themes override --icon-size on descendants. */
+  width: 9px;
+  height: 9px;
+}
+
+/* `:focus-visible`, never `:focus-within`. A right-click (or any click) focuses
+   the chip, since it carries tabindex="0" — with `:focus-within` the × stayed
+   lit after the pointer moved away, and only clicking elsewhere cleared it.
+   `:focus-visible` matches keyboard focus and not mouse focus, which is exactly
+   the distinction wanted: tabbing to a chip should reveal its delete badge,
+   clicking one should not leave it stuck on. */
+.spaces-color-cell:hover .spaces-color-remove,
+.spaces-color-cell:focus-visible .spaces-color-remove,
+.spaces-color-remove:focus-visible {
+  display: flex;
+}
+
+.spaces-color-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* §9.8: the embedded picker. Painted here rather than delegated to
+   <input type="color">, which opens the OS dialog in a second window. */
+.spaces-sv-field {
+  position: relative;
+  height: 110px;
+  border-radius: var(--radius-s);
+  margin-bottom: 8px;
+  cursor: crosshair;
+  touch-action: none;
+  background-image:
+    linear-gradient(to top, #000, rgba(0, 0, 0, 0)),
+    linear-gradient(to right, #fff, rgba(255, 255, 255, 0));
+}
+
+.spaces-hue-bar {
+  position: relative;
+  height: 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  cursor: ew-resize;
+  touch-action: none;
+  background-image: linear-gradient(
+    to right,
+    #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%
+  );
+}
+
+.spaces-picker-dot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  top: 50%;
+}
+
+.spaces-sv-field .spaces-picker-dot {
+  top: 0;
+}
+
+.spaces-color-preview {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--background-modifier-border);
+}
+
+.spaces-color-hex {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.spaces-color-hex.is-invalid {
+  border-color: var(--text-error);
+}
+
+.spaces-color-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+/* §21: the space header, directly above the file tree and below Obsidian's
+   own .nav-header. `flex: 0 0 auto` like the switcher strip, so the tree below
+   simply gets shorter rather than overflowing. The space's colour is set
+   inline on the ICON only -- see SpaceHeaderView for why the name must stay
+   themed. The padding is asymmetric on purpose: it sits tight to the rows it
+   labels and keeps its distance from the buttons above. */
+.spaces-space-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  min-height: 24px;
+  padding: 2px 12px 4px;
+  font-size: var(--font-ui-small);
+  font-weight: var(--font-semibold);
+}
+
+.spaces-space-header-icon {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.spaces-space-header-icon .svg-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* The negative margin cancels the padding, so the hover background reads as a
+   target around the name without the name itself shifting when it appears. */
+/* §21.7's pin: pushed to the right edge, and a FIXED width that never shrinks
+   or grows, so the space's own name keeps the rest of the row. That is the
+   whole reason this is an icon rather than the folder's name in text — a long
+   space name and a long folder name were fighting over one narrow row.
+   Muted, because it annotates the row rather than titling it. */
+.spaces-space-header-pin {
+  margin-left: auto;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+}
+.spaces-space-header-pin .svg-icon { width: 14px; height: 14px; }
+
+.spaces-space-header-name {
+  color: var(--text-normal);
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 1px 4px;
+  margin-left: -4px;
+  border-radius: var(--radius-s);
+}
+
+/* Only when renameable — All's label carries no role and stays inert text
+   (§9.9). `text`, not `pointer`: the click opens an editor, not a command. */
+.spaces-space-header-name[role="button"] {
+  cursor: text;
+}
+
+.spaces-space-header-name[role="button"]:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+/* Inherits font and colour so swapping the label for the input does not make
+   the row jump. */
+.spaces-space-header-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: auto;
+  padding: 1px 4px;
+  margin-left: -4px;
+  border-radius: var(--radius-s);
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+}
+
+/* §9.9: the switcher context menu's rename, anchored like §9.7's and §9.8's
+   pickers. */
+.spaces-rename-popover {
+  position: fixed;
+  z-index: var(--layer-menu);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 260px;
+  padding: 8px;
+  border-radius: var(--radius-m);
+  background-color: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  box-shadow: var(--shadow-s);
+}
+
+.spaces-rename-popover .spaces-rename-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* §7 fix round 2: the "Change folder…" affordance opened from the
+   missing-root Notice. Same shape as `.spaces-rename-popover` above —
+   `AnchoredPopover` positions and dismisses it identically. */
+.spaces-folder-picker-popover {
+  position: fixed;
+  z-index: var(--layer-menu);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 280px;
+  padding: 8px;
+  border-radius: var(--radius-m);
+  background-color: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  box-shadow: var(--shadow-s);
+}
+
+.spaces-folder-picker-popover .spaces-folder-picker-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* §21.6: the space list, opened from the header's icon. Anchored below the
+   header because AnchoredPopover prefers above and there is no room there. */
+.spaces-spaces-popover {
+  position: fixed;
+  z-index: var(--layer-menu);
+  min-width: 180px;
+  max-width: 280px;
+  padding: 4px;
+  border-radius: var(--radius-m);
+  background-color: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  box-shadow: var(--shadow-s);
+}
+
+/* Capped and scrollable: a vault with many spaces must not produce a popover
+   taller than the window. AnchoredPopover's outside-scroll dismissal already
+   ignores scrolls that happen inside itself. */
+.spaces-spaces-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.spaces-spaces-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  font-size: var(--font-ui-small);
+}
+
+.spaces-spaces-row:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+/* Distinct from hover, and not colour alone (§9.6): the active row keeps a
+   background AND carries aria-current. */
+.spaces-spaces-row.is-active {
+  background-color: var(--background-modifier-active-hover);
+  font-weight: var(--font-semibold);
+}
+
+.spaces-spaces-row:focus-visible {
+  outline: 1px solid var(--interactive-accent);
+  outline-offset: -1px;
+}
+
+.spaces-spaces-row-icon {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.spaces-spaces-row-icon .svg-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.spaces-spaces-row-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* The header icon is now a control, so it needs to look like one. */
+.spaces-space-header-icon[role="button"] {
+  cursor: pointer;
+  border-radius: var(--radius-s);
+  padding: 2px;
+  margin-left: -2px;
+}
+
+.spaces-space-header-icon[role="button"]:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+/* §9.4/R2: member rows, indented under their space so the list reads as
+   belonging to it rather than as more top-level settings. */
+.spaces-member-row {
+  padding-left: 2em;
+  border-top: none;
+}
+
+.spaces-member-row .setting-item-name {
+  font-size: var(--font-ui-small);
+  font-family: var(--font-monospace);
+}
+
+/* A missing entry is dimmed rather than coloured: it is not an error, just an
+   entry whose file has gone (§7.1). Colour is never the only signal (§9.6) —
+   the description says "Missing" in words. */
+.spaces-member-row.is-missing .setting-item-name {
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+
+/* ---------------------------------------------------------------------------
+   SJ-31 — touch.
+
+   `manifest.json` still declares `isDesktopOnly: true`, and nothing here
+   changes that: R11 judged the flag conservative but defensible, and narrowing
+   it is a release decision rather than a fix. What these rules remove is one of
+   the reasons it could NOT be narrowed — every spaces control was sized for a
+   mouse, and one of them was reachable only by hovering.
+
+   Both queries describe the POINTER, not the viewport. A desktop window
+   narrowed to phone width is therefore untouched: the icon strip's density is a
+   deliberate desktop choice (§19.2), and a width query would have thrown it
+   away on a split screen.
+   --------------------------------------------------------------------------- */
+
+/* §9.8's delete badge waits for `:hover`/`:focus-visible`, and a pointer that
+   cannot hover produces neither on the way to a tap — so a custom colour could
+   not be deleted on touch at all. Shown permanently instead: there is no hover
+   state here for it to be the reward of. Enlarged in the same breath — 14px is
+   under a third of the ~44px guideline, and it sits at the chip's corner where
+   a fingertip also covers the chip it is deleting. */
+@media (hover: none) {
+  .spaces-color-remove {
+    display: flex;
+    width: 22px;
+    height: 22px;
+    top: -6px;
+    right: -6px;
+    --icon-size: 13px;
+  }
+
+  .spaces-color-remove .svg-icon {
+    width: 13px;
+    height: 13px;
+  }
+}
+
+/* ~44px is the guideline; these are 28px. Enlarged only for a coarse pointer,
+   so the desktop strip keeps its density. The rail scrolls (§19.2), so the
+   extra width costs scroll distance and nothing else. */
+@media (pointer: coarse) {
+  .spaces-switcher-item,
+  .spaces-switcher-add {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Sized to the icon, not the strip (§9.11), so it grows with it. */
+  .spaces-space-drop-line {
+    height: 44px;
+  }
+}
+
+/* §19.6: the settings tab's own furniture.
+
+   There is deliberately NO visual treatment for a subordinate setting. Two
+   were tried against §20.7's "Allow reordering in All" and both were worse
+   than nothing: indenting the `.setting-item` shifted the whole row, and
+   themes that draw each setting as a bounded card then showed a bubble whose
+   left edge did not line up with the row above — a broken grid reads louder
+   than a hierarchy. Moving the indent and an accent spine inside the row kept
+   the bubbles flush but still singled the row out for no benefit the copy was
+   not already giving.
+
+   The relationship is carried by behaviour and words instead, which survive
+   every theme: the child is DISABLED while its parent is off, and its
+   description says so ("Reordering is off above, so this has no effect").
+   Rows stay full width, like every other setting. */
+
+/* The support line, above everything. Deliberately quiet: it is the first
+   thing on the tab and the least important thing on it. */
+.spaces-support {
+  margin: 0 0 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+}
+
+/* Shown when a space has no members, and when the whole vault has no spaces. */
+.spaces-settings-empty {
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+}
+
+/* §19.6: the settings tab strip. Obsidian has no component for sub-tabs
+   inside a plugin's settings pane, so this is owned furniture — built from
+   real <button>s, which is what makes it keyboard-operable without any
+   scripting of our own. */
+.spaces-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+.spaces-tab {
+  /* Obsidian's default button is a raised pill, which reads as an action
+     rather than a place. Stripped back so the strip reads as navigation. */
+  background: none;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 6px 12px;
+  margin-bottom: -1px;
+  cursor: pointer;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+}
+.spaces-tab:hover {
+  background: none;
+  color: var(--text-normal);
+  box-shadow: none;
+}
+.spaces-tab.is-active {
+  color: var(--text-normal);
+  font-weight: var(--font-medium);
+  border-bottom-color: var(--interactive-accent);
+}

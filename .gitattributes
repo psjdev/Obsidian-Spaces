@@ -1,0 +1,4 @@
+# Force LF regardless of core.autocrlf: a hook script checked out with CRLF
+# line endings breaks under sh (git for Windows defaults core.autocrlf=true,
+# which would otherwise convert this file on checkout).
+.githooks/* text eol=lf

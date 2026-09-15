@@ -1,0 +1,24 @@
+# Build output
+main.js
+main.css
+*.js.map
+coverage/
+
+# Dependencies
+node_modules/
+
+# Plugin data, written by Obsidian at runtime
+data.json
+data.json.bak
+
+# Local agent instructions and working context. Never part of a delivery;
+# listed here as a convenience only - the delivery gate is the control.
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+DECISIONS.md
+.claude/
+.codex/
+.superpowers/
+.scratch/
+.mcp.json

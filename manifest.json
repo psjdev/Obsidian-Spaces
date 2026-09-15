@@ -1,0 +1,14 @@
+{
+  "id": "spaces",
+  "name": "Spaces",
+  "version": "0.1.0",
+  "minAppVersion": "1.13.0",
+  "description": "Arc-style spaces: switch between curated views of your vault's folders and notes.",
+  "author": "peter.jamrozinski",
+  "authorUrl": "https://github.com/psjdev",
+  "fundingUrl": {
+    "Ko-fi": "https://ko-fi.com/psjdev",
+    "GitHub Sponsors": "https://github.com/sponsors/psjdev"
+  },
+  "isDesktopOnly": true
+}

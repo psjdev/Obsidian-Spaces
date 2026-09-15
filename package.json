@@ -1,0 +1,24 @@
+{
+  "name": "obsidian-spaces",
+  "version": "0.1.0",
+  "description": "Arc-style spaces for the Obsidian file explorer",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit && node esbuild.config.mjs production",
+    "dev": "node esbuild.config.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^2.1.9",
+    "esbuild": "^0.24.0",
+    "jsdom": "^25.0.0",
+    "obsidian": "^1.8.7",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
