@@ -1,7 +1,7 @@
 {
   "name": "obsidian-spaces",
-  "version": "0.1.0",
-  "description": "Arc-style spaces for the Obsidian file explorer",
+  "version": "0.1.1",
+  "description": "Switch between curated views of your vault's folders and notes.",
   "private": true,
   "license": "MIT",
   "type": "module",

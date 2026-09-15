@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.1 — 2026-09-15
+
+Drops the "Arc-style spaces:" prefix from the plugin's description, so the
+directory listing leads with what it does rather than what it resembles. The
+same text now sits in `package.json`, which had drifted to its own wording.
+
+No behaviour change.
+
 ## 0.1.0 — 2026-09-15
 
 The first public release. Everything below it predates publication: those
