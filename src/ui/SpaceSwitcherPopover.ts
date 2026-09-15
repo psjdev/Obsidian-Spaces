@@ -32,14 +32,14 @@ export function openSpaceSwitcher(deps: SpaceSwitcherDeps): AnchoredPopover {
     ariaLabel: "Switch space",
     build: (root, pop) => {
       const doc = root.ownerDocument;
-      const list = doc.createElement("div");
+      const list = doc.win.createDiv();
       list.className = "spaces-spaces-list";
       list.setAttribute("role", "listbox");
 
       const rows: HTMLElement[] = [];
 
       for (const entry of deps.entries) {
-        const row = doc.createElement("div");
+        const row = doc.win.createDiv();
         row.className = "spaces-spaces-row";
         row.setAttribute("role", "option");
         row.setAttribute("tabindex", "0");
@@ -49,7 +49,7 @@ export function openSpaceSwitcher(deps: SpaceSwitcherDeps): AnchoredPopover {
           row.setAttribute("aria-current", "true");
         }
 
-        const icon = doc.createElement("div");
+        const icon = doc.win.createDiv();
         icon.className = "spaces-spaces-row-icon";
         setIcon(icon, entry.icon);
         // The rule: the colour goes on the ICON, never the text. Measured
@@ -57,7 +57,7 @@ export function openSpaceSwitcher(deps: SpaceSwitcherDeps): AnchoredPopover {
         if (entry.color) icon.style.color = entry.color;
         row.appendChild(icon);
 
-        const name = doc.createElement("div");
+        const name = doc.win.createDiv();
         name.className = "spaces-spaces-row-name";
         name.textContent = entry.label;
         row.appendChild(name);

@@ -85,7 +85,7 @@ export class AnchoredPopover {
     const doc = this.opts.anchor.ownerDocument;
     this.doc = doc;
 
-    const el = doc.createElement("div");
+    const el = doc.win.createDiv();
     el.className = this.opts.className;
     el.setAttribute("role", "dialog");
     el.setAttribute("aria-label", this.opts.ariaLabel);

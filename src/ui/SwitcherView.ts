@@ -51,7 +51,7 @@ export class SwitcherView {
 
   mount(parent: HTMLElement): void {
     this.destroy();
-    const el = parent.ownerDocument.createElement("div");
+    const el = parent.ownerDocument.win.createDiv();
     el.className = "spaces-switcher";
     parent.appendChild(el);
     this.el = el;
@@ -114,7 +114,7 @@ export class SwitcherView {
       // sometimes separates nothing is worse than no rule — and without one,
       // icons scrolling under the pinned control look like they are vanishing
       // at an invisible edge.
-      const divider = el.ownerDocument.createElement("div");
+      const divider = el.ownerDocument.win.createDiv();
       divider.className = "spaces-switcher-divider";
       el.appendChild(divider);
     }
@@ -122,7 +122,7 @@ export class SwitcherView {
     // The icons scroll, the + does not. A `margin-left: auto` child of
     // an `overflow-x: auto` flex row scrolls away with the icons, which is
     // precisely when a create control is most wanted.
-    const rail = el.ownerDocument.createElement("div");
+    const rail = el.ownerDocument.win.createDiv();
     rail.className = "spaces-switcher-rail";
     el.appendChild(rail);
 
@@ -137,7 +137,7 @@ export class SwitcherView {
     // question is what the device can DO, not how wide it is.
     if (!Platform.isMobile) this.wireReorder(rail);
 
-    const add = el.ownerDocument.createElement("div");
+    const add = el.ownerDocument.win.createDiv();
     add.className = "spaces-switcher-add";
     add.setAttribute("role", "button");
     add.setAttribute("tabindex", "0");
@@ -165,7 +165,7 @@ export class SwitcherView {
    * the definitions subscription.
    */
   private wireReorder(rail: HTMLElement): void {
-    const line = rail.ownerDocument.createElement("div");
+    const line = rail.ownerDocument.win.createDiv();
     line.className = CLS_SPACE_DROP_LINE;
     line.hidden = true;
     rail.appendChild(line);
@@ -286,7 +286,7 @@ export class SwitcherView {
    */
   private buildItem(entry: SpaceEntry): HTMLElement {
     const el = this.el as HTMLElement;
-    const item = el.ownerDocument.createElement("div");
+    const item = el.ownerDocument.win.createDiv();
     item.className = "spaces-switcher-item";
     item.setAttribute("role", "button");
     item.setAttribute("tabindex", "0");

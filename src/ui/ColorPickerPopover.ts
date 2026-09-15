@@ -65,7 +65,7 @@ export function openColorPicker(deps: ColorPickerDeps): AnchoredPopover {
   }
 
   function renderPalette(root: HTMLElement, doc: Document, pop: AnchoredPopover): void {
-    const grid = doc.createElement("div");
+    const grid = doc.win.createDiv();
     grid.className = "spaces-color-grid";
 
     for (const sw of colorSwatches({
@@ -74,7 +74,7 @@ export function openColorPicker(deps: ColorPickerDeps): AnchoredPopover {
       customs,
       current: deps.current,
     })) {
-      const cell = doc.createElement("div");
+      const cell = doc.win.createDiv();
       cell.className = "spaces-color-cell";
       cell.setAttribute("role", "button");
       cell.setAttribute("tabindex", "0");
@@ -101,7 +101,7 @@ export function openColorPicker(deps: ColorPickerDeps): AnchoredPopover {
           render(root, pop);
         };
 
-        const del = doc.createElement("div");
+        const del = doc.win.createDiv();
         del.className = "spaces-color-remove";
         del.setAttribute("role", "button");
         del.setAttribute("tabindex", "0");
@@ -146,7 +146,7 @@ export function openColorPicker(deps: ColorPickerDeps): AnchoredPopover {
 
     // The + that opens the colour picker, styled as a chip so it reads as one
     // more slot in the palette rather than a control bolted beside it.
-    const add = doc.createElement("div");
+    const add = doc.win.createDiv();
     add.className = "spaces-color-cell spaces-color-add";
     add.setAttribute("role", "button");
     add.setAttribute("tabindex", "0");
@@ -177,31 +177,31 @@ export function openColorPicker(deps: ColorPickerDeps): AnchoredPopover {
       v: 1,
     };
 
-    const wrap = doc.createElement("div");
+    const wrap = doc.win.createDiv();
     wrap.className = "spaces-color-custom";
 
     // --- saturation / value field ---
-    const field = doc.createElement("div");
+    const field = doc.win.createDiv();
     field.className = "spaces-sv-field";
-    const fieldDot = doc.createElement("div");
+    const fieldDot = doc.win.createDiv();
     fieldDot.className = "spaces-picker-dot";
     field.appendChild(fieldDot);
     wrap.appendChild(field);
 
     // --- hue bar ---
-    const hue = doc.createElement("div");
+    const hue = doc.win.createDiv();
     hue.className = "spaces-hue-bar";
-    const hueDot = doc.createElement("div");
+    const hueDot = doc.win.createDiv();
     hueDot.className = "spaces-picker-dot";
     hue.appendChild(hueDot);
     wrap.appendChild(hue);
 
     // --- preview + hex ---
-    const row = doc.createElement("div");
+    const row = doc.win.createDiv();
     row.className = "spaces-color-row";
-    const preview = doc.createElement("div");
+    const preview = doc.win.createDiv();
     preview.className = "spaces-color-preview";
-    const hex = doc.createElement("input");
+    const hex = doc.win.createEl("input");
     hex.type = "text";
     hex.className = "spaces-color-hex";
     hex.setAttribute("aria-label", "Colour hex value");
@@ -269,10 +269,10 @@ export function openColorPicker(deps: ColorPickerDeps): AnchoredPopover {
       paint(true);
     });
 
-    const actions = doc.createElement("div");
+    const actions = doc.win.createDiv();
     actions.className = "spaces-color-actions";
 
-    const addBtn = doc.createElement("button");
+    const addBtn = doc.win.createEl("button");
     addBtn.className = "mod-cta";
     addBtn.textContent = "Add colour";
     addBtn.addEventListener("click", () => {
@@ -285,7 +285,7 @@ export function openColorPicker(deps: ColorPickerDeps): AnchoredPopover {
       pop.close();
     });
 
-    const back = doc.createElement("button");
+    const back = doc.win.createEl("button");
     back.textContent = "Back";
     back.addEventListener("click", () => {
       mode = "palette";

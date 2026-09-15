@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.1.6 — 2026-09-15
+
+Builds every element through Obsidian's own DOM helpers, which is the second
+of the two lint findings held back from 0.1.5.
+
+Seventy-one `document.createElement` calls become `doc.win.createDiv()` and
+friends. The point is the window: an element built through the owning document
+belongs to the window it is about to live in, so a popped-out file explorer
+gets elements from its own window rather than the main one. Same reasoning as
+0.1.5's `instanceOf` and `window.requestAnimationFrame`.
+
+Obsidian installs these helpers on every window but does not declare them on
+`Window` in `obsidian.d.ts`, so `src/obsidian-dom.d.ts` declares the four names
+this plugin calls. It is a type-level statement about an under-declared public
+API, verified against a live 1.13.7 window, and nothing about it runs.
+
+No behaviour change, no interface change, no change to saved data.
+
 ## 0.1.5 — 2026-09-15
 
 Acts on the community directory's automated review of 0.1.4, and adds the lint

@@ -595,7 +595,7 @@ export class DragOrdering {
 
   private ensureLine(container: HTMLElement): void {
     if (this.line) return;
-    const el = container.ownerDocument.createElement("div");
+    const el = container.ownerDocument.win.createDiv();
     el.className = CLS_DROP_LINE;
     // Created hidden, and it stays in the DOM for the life of the binding: see
     // the class comment on why inserting it mid-drag caused the flicker.

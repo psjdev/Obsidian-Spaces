@@ -63,7 +63,7 @@ export class SpaceHeaderView {
   mount(parent: HTMLElement): void {
     this.destroy();
     this.parent = parent;
-    const el = parent.ownerDocument.createElement("div");
+    const el = parent.ownerDocument.win.createDiv();
     el.className = "spaces-space-header";
     this.el = el;
     this.render();
@@ -134,7 +134,7 @@ export class SpaceHeaderView {
       this.folderExists
     );
 
-    const icon = doc.createElement("div");
+    const icon = doc.win.createDiv();
     icon.className = "spaces-space-header-icon";
     setIcon(icon, model.icon);
     // The colour goes on the ICON ALONE, never the row. Tinting the row was
@@ -182,7 +182,7 @@ export class SpaceHeaderView {
       }
     });
 
-    const label = doc.createElement("div");
+    const label = doc.win.createDiv();
     label.className = "spaces-space-header-name";
     label.textContent = model.label;
     el.appendChild(label);
@@ -197,7 +197,7 @@ export class SpaceHeaderView {
     //
     // Not focusable and not a control: it annotates the row, it does not act.
     if (this.defs.get().settings.showPinnedFolder && model.pinnedLabel !== null) {
-      const pin = doc.createElement("div");
+      const pin = doc.win.createDiv();
       pin.className = "spaces-space-header-pin";
       setIcon(pin, "pin");
       pin.setAttribute("aria-label", model.pinnedLabel);
@@ -237,7 +237,7 @@ export class SpaceHeaderView {
   ): void {
     this.editing = true;
 
-    const input = row.ownerDocument.createElement("input");
+    const input = row.ownerDocument.win.createEl("input");
     input.type = "text";
     input.className = "spaces-space-header-input";
     input.setAttribute("aria-label", "Space name");

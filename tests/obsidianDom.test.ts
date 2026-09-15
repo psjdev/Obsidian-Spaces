@@ -56,3 +56,78 @@ describe("instanceOf", () => {
     expect(() => node.instanceOf(Element)).not.toThrow();
   });
 });
+
+describe("the DOM helpers", () => {
+  it("builds in the window it was reached through, not the main one", () => {
+    const frame = document.createElement("iframe");
+    document.body.appendChild(frame);
+    const popout = frame.contentWindow;
+    if (!popout) throw new Error("iframe has no window");
+    installObsidianDom(popout as unknown as Parameters<typeof installObsidianDom>[0]);
+
+    // The whole reason `src/` says `el.doc.win.createDiv()` rather than the
+    // bare global: reached through a popout node, the element must belong to
+    // the popout's document.
+    const host = popout.document.body;
+    const made = host.doc.win.createDiv();
+    expect(made.ownerDocument).toBe(popout.document);
+    expect(made.ownerDocument).not.toBe(document);
+  });
+
+  it("applies the option bag", () => {
+    const el = window.createEl("input", {
+      cls: ["a", "b"],
+      attr: { "data-x": "1", "aria-hidden": true },
+      title: "t",
+      type: "text",
+      placeholder: "p",
+      value: "v",
+    });
+    expect(el.className).toBe("a b");
+    expect(el.getAttribute("data-x")).toBe("1");
+    expect(el.getAttribute("aria-hidden")).toBe("true");
+    expect(el.title).toBe("t");
+    expect(el.type).toBe("text");
+    expect(el.placeholder).toBe("p");
+    expect(el.value).toBe("v");
+  });
+
+  it("treats a bare string as the class, like Obsidian does", () => {
+    expect(window.createDiv("solo").className).toBe("solo");
+  });
+
+  it("removes an attribute given null rather than writing the word", () => {
+    const el = window.createDiv();
+    el.setAttribute("keep", "yes");
+    const again = window.createEl("div", { attr: { keep: null } });
+    expect(again.hasAttribute("keep")).toBe(false);
+    expect(el.getAttribute("keep")).toBe("yes");
+  });
+
+  it("appends when built through a parent node, and prepends when asked", () => {
+    const parent = document.createElement("div");
+    parent.appendChild(document.createElement("hr"));
+    const appended = parent.createDiv({ cls: "last" });
+    const prepended = parent.createSpan({ cls: "first", prepend: true });
+    expect(parent.firstElementChild).toBe(prepended);
+    expect(parent.lastElementChild).toBe(appended);
+    // Built through the parent, so it belongs to the parent's document.
+    expect(appended.ownerDocument).toBe(parent.ownerDocument);
+  });
+
+  it("moves a fragment given as text, rather than stringifying it", () => {
+    const frag = window.createFragment();
+    frag.appendChild(window.createSpan({ text: "inner" }));
+    const el = window.createDiv({ text: frag });
+    expect(el.textContent).toBe("inner");
+    expect(el.querySelector("span")).not.toBeNull();
+    expect(frag.childNodes.length).toBe(0);
+  });
+
+  it("runs the callback with the finished element", () => {
+    const seen: string[] = [];
+    const el = window.createDiv({ cls: "c" }, (made) => seen.push(made.className));
+    expect(seen).toEqual(["c"]);
+    expect(el.className).toBe("c");
+  });
+});

@@ -363,7 +363,7 @@ export class CreateSpacePanel {
     this.mountedContainer = container;
 
     try {
-      const el = parent.ownerDocument.createElement("div");
+      const el = parent.ownerDocument.win.createDiv();
       el.className = "spaces-create-panel";
       parent.appendChild(el);
       this.el = el;
@@ -646,19 +646,19 @@ export class CreateSpacePanel {
     this.closePicker();
     el.replaceChildren();
 
-    const title = doc.createElement("div");
+    const title = doc.win.createDiv();
     title.className = "spaces-create-title";
     title.textContent = "Create a space";
     el.appendChild(title);
 
     // --- Name ---
-    const nameRow = doc.createElement("div");
+    const nameRow = doc.win.createDiv();
     nameRow.className = "spaces-create-row";
 
     // The icon lives beside the name rather than in a row of its own: it is
     // one value, and a full-width shelf of presets spent a whole row on the
     // least important field. `""` means unchosen (createSpaceForm.ts).
-    const iconBtn = doc.createElement("div");
+    const iconBtn = doc.win.createDiv();
     iconBtn.className = "spaces-create-iconbtn";
     iconBtn.setAttribute("role", "button");
     iconBtn.tabIndex = 0;
@@ -676,7 +676,7 @@ export class CreateSpacePanel {
     });
     nameRow.appendChild(iconBtn);
 
-    const nameInput = doc.createElement("input");
+    const nameInput = doc.win.createEl("input");
     nameInput.type = "text";
     // The filling half of the name row. The growth rule is a class rather
     // than an inline style so a theme can reach it, which is also what
@@ -708,17 +708,17 @@ export class CreateSpacePanel {
     // same popover the space strip uses. A real `<button>`, unclassed like
     // Cancel, so it inherits Obsidian's own chrome and Enter/Space activate it
     // natively rather than through a hand-rolled keydown handler.
-    const themeBtn = doc.createElement("button");
+    const themeBtn = doc.win.createEl("button");
     themeBtn.className = "spaces-create-theme";
     themeBtn.type = "button";
     themeBtn.dataset.focusKey = "theme";
-    const themeIcon = doc.createElement("span");
+    const themeIcon = doc.win.createSpan();
     themeIcon.className = "spaces-create-theme-icon";
     // Deliberately NOT tinted with the chosen colour: the brush labels the
     // action, and the thing it colours is the space's own icon up in the name
     // row, which is where the choice shows (`paintIconButton`).
     setIcon(themeIcon, "brush");
-    const themeLabel = doc.createElement("span");
+    const themeLabel = doc.win.createSpan();
     themeLabel.textContent = "Choose icon colour";
     themeBtn.appendChild(themeIcon);
     themeBtn.appendChild(themeLabel);
@@ -738,13 +738,13 @@ export class CreateSpacePanel {
     // space cannot be changed after creation, so both options are named and
     // neither is the one you get by not noticing. Switching is free —
     // `setFolderMode` discards nothing and each side remembers what it had.
-    const modes = doc.createElement("div");
+    const modes = doc.win.createDiv();
     modes.className = "spaces-create-modes";
     modes.setAttribute("role", "group");
     modes.setAttribute("aria-label", "What goes in this space");
 
     const modeBtn = (folderMode: boolean, label: string, icon: string): HTMLButtonElement => {
-      const btn = doc.createElement("button");
+      const btn = doc.win.createEl("button");
       btn.type = "button";
       btn.className = "spaces-create-mode";
       // Pressed means "this mode is in force", which outlives the picker: a
@@ -758,10 +758,10 @@ export class CreateSpacePanel {
       if (active) btn.classList.add("is-active");
       btn.setAttribute("aria-pressed", String(active));
       btn.dataset.focusKey = folderMode ? "mode-folder" : "mode-curate";
-      const ic = doc.createElement("span");
+      const ic = doc.win.createSpan();
       ic.className = "spaces-create-theme-icon";
       setIcon(ic, icon);
-      const text = doc.createElement("span");
+      const text = doc.win.createSpan();
       text.textContent = this.modeSummary(folderMode, label);
       btn.appendChild(ic);
       btn.appendChild(text);
@@ -791,10 +791,10 @@ export class CreateSpacePanel {
     el.appendChild(modes);
 
     if (this.itemsOpen) {
-      const view = doc.createElement("div");
+      const view = doc.win.createDiv();
       view.className = "spaces-create-items";
 
-      const treeEl = doc.createElement("div");
+      const treeEl = doc.win.createDiv();
       treeEl.className = "spaces-create-tree";
       // Focusable programmatically but NOT in the tab order: `showFault` marks
       // this box and then focuses it, and `focus()` is a silent no-op on an
@@ -803,7 +803,7 @@ export class CreateSpacePanel {
       // button.
       treeEl.tabIndex = -1;
 
-      const filter = doc.createElement("input");
+      const filter = doc.win.createEl("input");
       filter.type = "text";
       filter.className = "text-input";
       filter.placeholder = this.state.folderMode ? "Filter folders…" : "Filter items…";
@@ -820,7 +820,7 @@ export class CreateSpacePanel {
       // requires treeitems to be owned by the tree, and with an unroled div in
       // between assistive tech reported a tree of zero items and a pile of
       // orphaned rows.
-      const rowsEl = doc.createElement("div");
+      const rowsEl = doc.win.createDiv();
       rowsEl.className = "spaces-create-tree-rows";
       rowsEl.setAttribute("role", "tree");
       rowsEl.setAttribute("aria-label", this.state.folderMode ? "Choose a folder" : "Choose items");
@@ -836,9 +836,9 @@ export class CreateSpacePanel {
 
 
     // --- Actions, pinned to the bottom ---
-    const actions = doc.createElement("div");
+    const actions = doc.win.createDiv();
     actions.className = "spaces-create-actions";
-    const createBtn = doc.createElement("button");
+    const createBtn = doc.win.createEl("button");
     createBtn.className = "mod-cta";
     createBtn.textContent = this.submitting ? "Creating…" : "Create space";
     // Only a submit in flight disables it: a greyed-out button with no reason
@@ -850,7 +850,7 @@ export class CreateSpacePanel {
     actions.appendChild(createBtn);
     this.createBtn = createBtn;
 
-    const cancelBtn = doc.createElement("button");
+    const cancelBtn = doc.win.createEl("button");
     cancelBtn.textContent = "Cancel";
     cancelBtn.dataset.focusKey = "cancel";
     cancelBtn.addEventListener("click", () => this.close());
@@ -920,7 +920,7 @@ export class CreateSpacePanel {
       existing?.remove();
       return;
     }
-    const el = existing ?? box.ownerDocument.createElement("div");
+    const el = existing ?? box.ownerDocument.win.createDiv();
     el.className = "spaces-create-tree-more";
     el.setAttribute("role", "status");
     el.textContent = `${hidden.toLocaleString()} more — keep typing to narrow`;
@@ -956,7 +956,7 @@ export class CreateSpacePanel {
 
     host.replaceChildren();
     if (rows.length === 0) {
-      const empty = doc.createElement("div");
+      const empty = doc.win.createDiv();
       empty.className = "spaces-create-tree-empty";
       // Distinguishes "your filter matched nothing" from "there is nothing
       // here" — identical as an empty box, different things to do about it.
@@ -967,7 +967,7 @@ export class CreateSpacePanel {
     }
 
     for (const row of rows) {
-      const el = doc.createElement("div");
+      const el = doc.win.createDiv();
       el.className = "spaces-create-tree-row";
       el.setAttribute("role", "treeitem");
       el.tabIndex = 0;
@@ -982,7 +982,7 @@ export class CreateSpacePanel {
       el.setAttribute("aria-selected", String(row.selected));
       if (row.hasChildren) el.setAttribute("aria-expanded", String(row.expanded));
 
-      const caret = doc.createElement("span");
+      const caret = doc.win.createSpan();
       caret.className = "spaces-create-tree-caret";
       if (row.hasChildren) {
         setIcon(caret, row.expanded ? "chevron-down" : "chevron-right");
@@ -1002,12 +1002,12 @@ export class CreateSpacePanel {
       }
       el.appendChild(caret);
 
-      const icon = doc.createElement("span");
+      const icon = doc.win.createSpan();
       icon.className = "spaces-create-tree-icon";
       setIcon(icon, row.kind === "folder" ? "folder" : "file");
       el.appendChild(icon);
 
-      const label = doc.createElement("span");
+      const label = doc.win.createSpan();
       label.className = "spaces-create-tree-name";
       label.textContent = row.name;
       el.appendChild(label);

@@ -48,14 +48,14 @@ export function openIconPicker(
     build: (root, popover) => {
       const doc = root.ownerDocument;
 
-      const search = doc.createElement("input");
+      const search = doc.win.createEl("input");
       search.type = "text";
       search.className = "spaces-icon-search";
       search.placeholder = "Search icons…";
       search.setAttribute("aria-label", "Search icons");
       root.appendChild(search);
 
-      const grid = doc.createElement("div");
+      const grid = doc.win.createDiv();
       grid.className = "spaces-icon-grid";
       root.appendChild(grid);
 
@@ -63,7 +63,7 @@ export function openIconPicker(
         grid.replaceChildren();
         const ids = iconSearchResults({ query, allIds });
         if (ids.length === 0) {
-          const empty = doc.createElement("div");
+          const empty = doc.win.createDiv();
           empty.className = "spaces-icon-empty";
           empty.textContent = "No matching icon";
           grid.appendChild(empty);
@@ -71,7 +71,7 @@ export function openIconPicker(
           return;
         }
         for (const id of ids) {
-          const cell = doc.createElement("div");
+          const cell = doc.win.createDiv();
           cell.className = "spaces-icon-cell";
           cell.setAttribute("role", "button");
           cell.setAttribute("tabindex", "0");

@@ -75,7 +75,7 @@ export function openFolderPickerPopover(deps: FolderPickerPopoverDeps): Anchored
         pop.close();
       };
 
-      const input = doc.createElement("input");
+      const input = doc.win.createEl("input");
       input.type = "text";
       input.className = "spaces-folder-picker-input";
       input.setAttribute("aria-label", "Folder path");
@@ -117,7 +117,7 @@ export function openFolderPickerPopover(deps: FolderPickerPopoverDeps): Anchored
         }
       });
 
-      const clear = doc.createElement("button");
+      const clear = doc.win.createEl("button");
       clear.textContent = "Clear";
       clear.setAttribute(
         "aria-label",

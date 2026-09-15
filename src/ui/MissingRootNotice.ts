@@ -111,12 +111,12 @@ export class MissingRootNotice {
   }
 
   private message(space: SpaceDefinition, detail: string): DocumentFragment {
-    const frag = document.createDocumentFragment();
-    const text = document.createElement("span");
+    const frag = document.win.createFragment();
+    const text = document.win.createSpan();
     text.textContent = `Spaces: "${space.name}" is a folder pinned space, and ${detail}. `;
     frag.appendChild(text);
 
-    const change = document.createElement("button");
+    const change = document.win.createEl("button");
     change.textContent = "Change folder…";
     change.className = "mod-cta";
     change.addEventListener("click", (e) => {

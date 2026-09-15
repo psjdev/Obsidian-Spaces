@@ -30,7 +30,7 @@ export function openRenamePopover(deps: RenamePopoverDeps): AnchoredPopover {
     build: (root, pop) => {
       const doc = root.ownerDocument;
 
-      const input = doc.createElement("input");
+      const input = doc.win.createEl("input");
       input.type = "text";
       input.className = "spaces-rename-input";
       input.setAttribute("aria-label", "Space name");
@@ -66,7 +66,7 @@ export function openRenamePopover(deps: RenamePopoverDeps): AnchoredPopover {
         }
       });
 
-      const go = doc.createElement("button");
+      const go = doc.win.createEl("button");
       go.className = "mod-cta";
       go.textContent = "Rename";
       go.addEventListener("click", commit);

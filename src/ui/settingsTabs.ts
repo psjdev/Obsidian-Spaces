@@ -95,7 +95,7 @@ export function renderTabStrip(containerEl: HTMLElement, spec: TabStripSpec): Ta
   const doc = containerEl.ownerDocument;
   const panelId = `${spec.idPrefix}-panel-${spec.activeId}`;
 
-  const strip = doc.createElement("div");
+  const strip = doc.win.createDiv();
   strip.className = "spaces-tabs";
   strip.setAttribute("role", "tablist");
   strip.setAttribute("aria-label", spec.label);
@@ -105,7 +105,7 @@ export function renderTabStrip(containerEl: HTMLElement, spec: TabStripSpec): Ta
 
   spec.tabs.forEach((tab, index) => {
     const active = tab.id === spec.activeId;
-    const btn = doc.createElement("button");
+    const btn = doc.win.createEl("button");
     btn.id = `${spec.idPrefix}-tab-${tab.id}`;
     btn.className = active ? "spaces-tab is-active" : "spaces-tab";
     btn.textContent = tab.label;
@@ -152,7 +152,7 @@ export function renderTabStrip(containerEl: HTMLElement, spec: TabStripSpec): Ta
   if (!activeEl) throw new Error(`spaces: no tab matches "${spec.activeId}"`);
   const selected: HTMLElement = activeEl;
 
-  const panelEl = doc.createElement("div");
+  const panelEl = doc.win.createDiv();
   panelEl.id = panelId;
   panelEl.setAttribute("role", "tabpanel");
   // Named by its own tab, so a screen reader entering the panel says which
