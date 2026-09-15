@@ -286,6 +286,19 @@ export class PluginSettingTab {
   hide(): void {
     notModelled("PluginSettingTab.hide()", "Modal teardown is not modelled.");
   }
+
+  /**
+   * The declarative tab's redraw. Loud rather than absent for the usual
+   * reason: `SpacesSettingTab` calls this after a write, and a silently
+   * missing method would let a test pass while the redraw it is supposed to
+   * prove never happened.
+   */
+  update(): void {
+    notModelled(
+      "PluginSettingTab.update()",
+      "Obsidian renders from getSettingDefinitions(); that rendering is not modelled here."
+    );
+  }
 }
 
 /**
