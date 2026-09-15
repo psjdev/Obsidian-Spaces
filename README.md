@@ -118,7 +118,7 @@ All available from the command palette, and bindable to hotkeys.
 
 ## Settings
 
-Settings → Spaces has two tabs. **Preferences** holds the toggles below; **Spaces** lists your spaces, where you can rename one, review its members, or delete it.
+Settings → Spaces has two pages. **Preferences** holds the toggles below; **Spaces** lists your spaces, where you can rename one, review its members, or delete it. Every setting here is findable from Obsidian's own settings search.
 
 | Setting | Default | What it controls |
 |---|---|---|

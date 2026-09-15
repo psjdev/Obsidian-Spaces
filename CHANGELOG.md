@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.2.0 — 2026-09-15
+
+The settings tab is declared rather than drawn, which is what puts it in
+Obsidian's settings search.
+
+### Settings
+
+- **Settings are searchable.** Typing "reorder" or "ignored" into the Settings
+  search box now finds them. Previously the tab was built imperatively, so
+  there was nothing for Obsidian to index.
+- **Obsidian draws the navigation.** Preferences and Spaces are now pages
+  Obsidian renders and moves between, replacing the tab strip this plugin drew
+  itself. The split is unchanged: the toggles on one screen grouped by heading,
+  the space list on its own.
+- Every setting, group and warning reads exactly as it did. The ignored-paths
+  box still commits when you click away rather than as you type, a space still
+  renames on blur, and Delete still asks first.
+
+### Under it
+
+- `getSettingDefinitions()` replaces `display()`, which Obsidian deprecated in
+  1.13. Saving still goes through this plugin's own store: `getControlValue`
+  and `setControlValue` are overridden, so schema validation, write tokens and
+  external-change handling are unchanged, and `data.json` keeps its shape.
+- 464 lines of hand-rolled tab strip and its tests are gone, and the settings
+  file is 220 lines shorter.
+
+This is the last of the findings from the community directory's review of
+0.1.4. The plugin's lint is now clean: no errors and no warnings.
+
 ## 0.1.6 — 2026-09-15
 
 Builds every element through Obsidian's own DOM helpers, which is the second
