@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.3 — 2026-09-15
+
+The author field now reads as a name rather than a username. It is shown as
+"By …" in the plugin browser, where `peter.jamrozinski` looked like an email
+fragment. The copyright line matches.
+
+No behaviour change.
+
 ## 0.1.2 — 2026-09-15
 
 Rewrites the 0.1.0 notes. They had been written as changes relative to earlier

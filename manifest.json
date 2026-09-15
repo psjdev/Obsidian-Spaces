@@ -1,10 +1,10 @@
 {
   "id": "spaces",
   "name": "Spaces",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "minAppVersion": "1.13.0",
   "description": "Switch between curated views of your vault's folders and notes.",
-  "author": "peter.jamrozinski",
+  "author": "Peter Jamrozinski",
   "authorUrl": "https://github.com/psjdev",
   "fundingUrl": {
     "Ko-fi": "https://ko-fi.com/psjdev",
